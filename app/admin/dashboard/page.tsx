@@ -2,19 +2,65 @@
 
 import { useState, useEffect } from "react"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { ArrowRight, DollarSign, ShoppingBag, UsersIcon, TrendingUp, Package, FileText } from "lucide-react"
 import { motion } from "framer-motion"
+import { useToast } from "@/components/ui/use-toast"
 
 export default function AdminDashboard() {
   const [country, setCountry] = useState("")
+  const [loading, setLoading] = useState(true)
+  const router = useRouter()
+  const { toast } = useToast()
 
   useEffect(() => {
-    const selectedCountry = localStorage.getItem("country")
-    if (selectedCountry) {
-      setCountry(selectedCountry)
+    const checkAuth = async () => {
+      try {
+        // Check if user is authenticated and is an admin
+        const response = await fetch("/api/user/me")
+        const data = await response.json()
+
+        if (!data.success || !data.user || data.user.role !== "ADMIN") {
+          toast({
+            title: "Access Denied",
+            description: "You need to be logged in as an admin to view this page",
+            variant: "destructive"
+          })
+          router.push("/login")
+          return
+        }
+
+        // Set country from user data
+        if (data.user.country) {
+          setCountry(data.user.country)
+        }
+
+        setLoading(false)
+      } catch (error) {
+        console.error("Auth check error:", error)
+        toast({
+          title: "Error",
+          description: "Failed to verify your credentials",
+          variant: "destructive"
+        })
+        router.push("/login")
+      }
     }
-  }, [])
+
+    checkAuth()
+  }, [router, toast])
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <div className="text-center">
+          <h2 className="text-2xl font-semibold mb-4">Loading dashboard...</h2>
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary mx-auto"></div>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="space-y-8">
@@ -52,11 +98,11 @@ export default function AdminDashboard() {
         >
           <Card className="overflow-hidden">
             <CardHeader className="pb-2">
-              <CardTitle className="text-lg">Inventory Management</CardTitle>
+              <CardTitle className="text-lg">Products Management</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <Link
-                href="/admin/inventory"
+                href="/admin/products"
                 className="flex items-center justify-between p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors"
               >
                 <div className="flex items-center gap-3">
@@ -64,7 +110,7 @@ export default function AdminDashboard() {
                     <Package className="h-4 w-4 text-teal" />
                   </div>
                   <div>
-                    <div className="font-medium">View Inventory</div>
+                    <div className="font-medium">View Products</div>
                     <div className="text-sm text-muted-foreground">Manage product stock and prices</div>
                   </div>
                 </div>
@@ -72,7 +118,7 @@ export default function AdminDashboard() {
               </Link>
 
               <Link
-                href="/admin/inventory/add"
+                href="/admin/products/add"
                 className="flex items-center justify-between p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors"
               >
                 <div className="flex items-center gap-3">

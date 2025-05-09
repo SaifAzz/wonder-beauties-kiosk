@@ -9,6 +9,7 @@ import { Logo } from "@/components/logo"
 import { Button } from "@/components/ui/button"
 import { LayoutDashboard, Package, FileText, Users, LogOut, Menu, X } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { useToast } from "@/components/ui/use-toast"
 
 export default function AdminLayout({
   children,
@@ -19,24 +20,66 @@ export default function AdminLayout({
   const pathname = usePathname()
   const [mounted, setMounted] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const { toast } = useToast()
 
   useEffect(() => {
     setMounted(true)
-    // Check if user is logged in and is admin
-    const userRole = localStorage.getItem("userRole")
-    if (!userRole || userRole !== "admin") {
+
+    // Skip auth check for the login page
+    if (pathname === "/admin/login") return
+
+    // Verify admin authentication using session
+    const checkAuth = async () => {
+      try {
+        const response = await fetch("/api/user/me")
+        const data = await response.json()
+
+        if (!data.success || !data.user || data.user.role !== "ADMIN") {
+          toast({
+            title: "Authentication Required",
+            description: "Please login as an admin to access this page",
+            variant: "destructive",
+          })
+          router.push("/login")
+        }
+      } catch (error) {
+        console.error("Auth check error:", error)
+        router.push("/login")
+      }
+    }
+
+    checkAuth()
+  }, [router, pathname, toast])
+
+  const handleLogout = async () => {
+    try {
+      // Call the logout API endpoint
+      await fetch("/api/auth/logout", {
+        method: "POST",
+      })
+
+      toast({
+        title: "Logged Out",
+        description: "You have been successfully logged out",
+      })
+
+      // Redirect to login page
+      router.push("/login")
+    } catch (error) {
+      console.error("Logout error:", error)
+      toast({
+        title: "Error",
+        description: "Failed to logout properly",
+        variant: "destructive",
+      })
+      // Still redirect even if there's an error
       router.push("/login")
     }
-  }, [router])
-
-  const handleLogout = () => {
-    localStorage.removeItem("userRole")
-    router.push("/login")
   }
 
   const navigation = [
     { name: "Dashboard", href: "/admin/dashboard", icon: LayoutDashboard },
-    { name: "Inventory", href: "/admin/inventory", icon: Package },
+    { name: "Products", href: "/admin/products", icon: Package },
     { name: "Reports", href: "/admin/reports", icon: FileText },
     { name: "Users", href: "/admin/users", icon: Users },
   ]

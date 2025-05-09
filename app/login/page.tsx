@@ -1,80 +1,107 @@
 "use client"
 
-import type React from "react"
-
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { useRouter } from "next/navigation"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import Link from "next/link"
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Logo } from "@/components/logo"
-import { motion } from "framer-motion"
-import { Coffee, Lock, Phone } from "lucide-react"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { useToast } from "@/components/ui/use-toast"
+import { Phone, Lock } from "lucide-react"
 
-export default function Login() {
-  const router = useRouter()
-  const [phoneNumber, setPhoneNumber] = useState("")
+export default function LoginPage() {
+  const [phone, setPhone] = useState("")
   const [password, setPassword] = useState("")
-  const [error, setError] = useState("")
-  const [isAdmin, setIsAdmin] = useState(false)
-  const [mounted, setMounted] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
+  const router = useRouter()
+  const { toast } = useToast()
 
-  useEffect(() => {
-    setMounted(true)
-    // Check if country is selected
-    const country = localStorage.getItem("country")
-    if (!country) {
-      router.push("/select-country")
-    }
-  }, [router])
-
-  const handleLogin = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setError("")
 
-    // Mock login logic - in a real app, this would validate against your backend
-    if (phoneNumber === "admin" && password === "admin") {
-      localStorage.setItem("userRole", "admin")
-      router.push("/admin/dashboard")
-    } else if (phoneNumber && password) {
-      localStorage.setItem("userRole", "user")
-      router.push("/catalog")
-    } else {
-      setError("Invalid phone number or password")
+    if (!phone || !password) {
+      toast({
+        title: "Error",
+        description: "Please enter both phone number and password",
+        variant: "destructive",
+      })
+      return
+    }
+
+    try {
+      setIsLoading(true)
+
+      const response = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          phone,
+          password,
+        }),
+      })
+
+      const data = await response.json()
+
+      if (!data.success) {
+        toast({
+          title: "Login Failed",
+          description: data.message || "Invalid credentials. Please try again.",
+          variant: "destructive",
+        })
+        return
+      }
+
+      toast({
+        title: "Login Successful",
+        description: "Welcome back!",
+      })
+
+      // Redirect based on user role
+      if (data.user.role === "ADMIN") {
+        router.push("/admin/dashboard")
+      } else {
+        router.push("/catalog")
+      }
+    } catch (error) {
+      console.error("Login error:", error)
+      toast({
+        title: "Error",
+        description: "An error occurred during login. Please try again later.",
+        variant: "destructive",
+      })
+    } finally {
+      setIsLoading(false)
     }
   }
 
-  if (!mounted) return null
-
   return (
-    <div className="min-h-screen food-pattern flex flex-col items-center justify-center p-4">
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-        <Card className="w-full max-w-md shadow-lg border-none">
-          <CardHeader className="text-center space-y-2">
-            <div className="flex justify-center mb-2">
-              <Logo />
-            </div>
-            <CardTitle className="text-2xl font-bold">Welcome Back</CardTitle>
-            <CardDescription className="text-base">Sign in to your account to continue</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleLogin} className="space-y-4">
-              <div className="space-y-2">
+    <div className="container flex items-center justify-center min-h-screen py-10">
+      <Card className="w-full max-w-md">
+        <CardHeader>
+          <CardTitle className="text-2xl font-bold text-center">Login to Your Account</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleSubmit}>
+            <div className="grid gap-4">
+              <div className="grid gap-2">
                 <Label htmlFor="phone">Phone Number</Label>
                 <div className="relative">
                   <Phone className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                   <Input
                     id="phone"
                     placeholder="Enter your phone number"
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
                     className="pl-10"
-                    value={phoneNumber}
-                    onChange={(e) => setPhoneNumber(e.target.value)}
                   />
                 </div>
               </div>
 
-              <div className="space-y-2">
+              <div className="grid gap-2">
                 <Label htmlFor="password">Password</Label>
                 <div className="relative">
                   <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
@@ -82,28 +109,28 @@ export default function Login() {
                     id="password"
                     type="password"
                     placeholder="Enter your password"
-                    className="pl-10"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
+                    className="pl-10"
                   />
                 </div>
               </div>
 
-              {error && <div className="text-destructive text-sm">{error}</div>}
-
-              <Button type="submit" className="w-full">
-                Sign In
+              <Button type="submit" className="w-full" disabled={isLoading}>
+                {isLoading ? "Logging in..." : "Login"}
               </Button>
-            </form>
-          </CardContent>
-          <CardFooter className="flex justify-center">
-            <div className="text-sm text-muted-foreground flex items-center gap-2">
-              <Coffee className="h-4 w-4" />
-              <span>Delicious food awaits you!</span>
             </div>
-          </CardFooter>
-        </Card>
-      </motion.div>
+          </form>
+        </CardContent>
+        <CardFooter className="flex flex-col">
+          <p className="text-center text-sm mt-2">
+            Don&apos;t have an account?{" "}
+            <Link href="/register" className="underline text-primary">
+              Register here
+            </Link>
+          </p>
+        </CardFooter>
+      </Card>
     </div>
   )
 }

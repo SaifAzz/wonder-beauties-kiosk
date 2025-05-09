@@ -1,127 +1,280 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import Link from "next/link"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Badge } from "@/components/ui/badge"
-import { Search, ArrowLeft, User, DollarSign } from "lucide-react"
-import { motion } from "framer-motion"
+import { Label } from "@/components/ui/label"
+import { useToast } from "@/components/ui/use-toast"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { MapPin, Pencil, DollarSign } from "lucide-react"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 
-// Mock users data
-const mockUsers = [
-  { id: 1, phone: "+9897969714", name: "Customer", balance: 0, transactions: 0 },
-  { id: 2, phone: "+963123456789", name: "Customer", balance: 10, transactions: 2 },
-  { id: 3, phone: "+963124456789", name: "Customer", balance: 0, transactions: 0 },
-  { id: 4, phone: "09111222", name: "Customer", balance: 0, transactions: 0 },
-  { id: 5, phone: "09876543", name: "Customer", balance: 0, transactions: 0 },
-  { id: 6, phone: "0987654333", name: "Customer", balance: 0, transactions: 0 },
-]
+interface User {
+  id: string
+  name: string
+  phone: string
+  country: string
+  balance: number
+  role: string
+}
 
-export default function UserManagement() {
-  const [users, setUsers] = useState(mockUsers)
-  const [searchQuery, setSearchQuery] = useState("")
-  const [country, setCountry] = useState("")
+export default function AdminUsersPage() {
+  const [users, setUsers] = useState<User[]>([])
+  const [loading, setLoading] = useState(true)
+  const [selectedUser, setSelectedUser] = useState<User | null>(null)
+  const [amountToAdd, setAmountToAdd] = useState("")
+  const [isDialogOpen, setIsDialogOpen] = useState(false)
+  const { toast } = useToast()
 
   useEffect(() => {
-    const selectedCountry = localStorage.getItem("country")
-    if (selectedCountry) {
-      setCountry(selectedCountry)
+    const fetchUsers = async () => {
+      try {
+        const response = await fetch("/api/admin/users")
+
+        if (response.ok) {
+          const data = await response.json()
+          if (data.success) {
+            setUsers(data.users)
+          }
+        } else {
+          toast({
+            title: "Error",
+            description: "Failed to load users. Please try again.",
+            variant: "destructive",
+          })
+        }
+      } catch (error) {
+        console.error("Error fetching users:", error)
+        toast({
+          title: "Error",
+          description: "Failed to load users. Please try again.",
+          variant: "destructive",
+        })
+      } finally {
+        setLoading(false)
+      }
     }
-  }, [])
 
-  const filteredUsers = users.filter(
-    (user) => user.phone.includes(searchQuery) || user.name.toLowerCase().includes(searchQuery.toLowerCase()),
-  )
+    fetchUsers()
+  }, [toast])
 
-  const handleSettleBalance = (userId: number) => {
-    setUsers(users.map((user) => (user.id === userId ? { ...user, balance: 0 } : user)))
+  const handleAddBalance = async () => {
+    if (!selectedUser) return
+
+    try {
+      const amount = parseFloat(amountToAdd)
+
+      if (isNaN(amount) || amount <= 0) {
+        toast({
+          title: "Invalid amount",
+          description: "Please enter a valid positive amount",
+          variant: "destructive",
+        })
+        return
+      }
+
+      const response = await fetch("/api/balance", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          userId: selectedUser.id,
+          amount,
+        }),
+      })
+
+      const data = await response.json()
+
+      if (data.success) {
+        toast({
+          title: "Success",
+          description: data.message,
+        })
+
+        // Update user in the list
+        setUsers(users.map(user =>
+          user.id === selectedUser.id
+            ? { ...user, balance: user.balance + amount }
+            : user
+        ))
+
+        // Reset and close
+        setAmountToAdd("")
+        setIsDialogOpen(false)
+      } else {
+        toast({
+          title: "Error",
+          description: data.message || "Failed to add balance",
+          variant: "destructive",
+        })
+      }
+    } catch (error) {
+      console.error("Error adding balance:", error)
+      toast({
+        title: "Error",
+        description: "Failed to add balance",
+        variant: "destructive",
+      })
+    }
+  }
+
+  const openAddBalanceDialog = (user: User) => {
+    setSelectedUser(user)
+    setAmountToAdd("")
+    setIsDialogOpen(true)
+  }
+
+  if (loading) {
+    return (
+      <div className="container py-10">
+        <h1 className="text-3xl font-bold mb-8">User Management</h1>
+        <p>Loading users...</p>
+      </div>
+    )
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div className="flex items-center gap-2">
-          <Link href="/admin/dashboard">
-            <Button variant="ghost" size="icon" className="h-8 w-8">
-              <ArrowLeft className="h-4 w-4" />
-            </Button>
-          </Link>
-          <h1 className="text-2xl font-bold tracking-tight">User Management</h1>
-        </div>
-        <div className="text-sm bg-muted px-3 py-1 rounded-full">
-          <span className="text-muted-foreground">Country:</span>
-          <span className="font-medium capitalize ml-1">{country}</span>
-        </div>
-      </div>
+    <div className="container py-10">
+      <h1 className="text-3xl font-bold mb-8">User Management</h1>
 
-      <div className="relative">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-        <Input
-          placeholder="Search by phone number or name..."
-          className="pl-10"
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-        />
-      </div>
+      <Tabs defaultValue="users">
+        <TabsList className="mb-6">
+          <TabsTrigger value="users">All Users</TabsTrigger>
+          <TabsTrigger value="iraq">Iraq</TabsTrigger>
+          <TabsTrigger value="syria">Syria</TabsTrigger>
+        </TabsList>
 
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {filteredUsers.map((user, index) => (
-          <motion.div
-            key={user.id}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3, delay: index * 0.05 }}
-          >
-            <Card>
-              <CardHeader className="pb-2">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 rounded-full bg-cherry/10 flex items-center justify-center">
-                      <User className="h-4 w-4 text-cherry" />
-                    </div>
-                    <CardTitle className="text-base">{user.phone}</CardTitle>
-                  </div>
-                  {user.balance > 0 && (
-                    <Badge className="bg-amber-100 text-amber-800 hover:bg-amber-100">Has Balance</Badge>
-                  )}
-                </div>
-                <CardDescription>{user.name}</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-muted-foreground">Current Balance:</span>
-                  <span className={`font-medium ${user.balance > 0 ? "text-cherry" : "text-green-600"}`}>
-                    ${user.balance.toFixed(2)}
-                  </span>
-                </div>
+        <TabsContent value="users">
+          <UserTable users={users} onAddBalance={openAddBalanceDialog} />
+        </TabsContent>
 
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-muted-foreground">Transactions:</span>
-                  <span className="font-medium">{user.transactions}</span>
-                </div>
+        <TabsContent value="iraq">
+          <UserTable
+            users={users.filter(user => user.country === "Iraq")}
+            onAddBalance={openAddBalanceDialog}
+          />
+        </TabsContent>
 
-                {user.balance > 0 && (
-                  <Button
-                    className="w-full bg-green-600 hover:bg-green-700"
-                    onClick={() => handleSettleBalance(user.id)}
-                  >
-                    <DollarSign className="h-4 w-4 mr-2" />
-                    Settle Balance
-                  </Button>
-                )}
-              </CardContent>
-            </Card>
-          </motion.div>
-        ))}
+        <TabsContent value="syria">
+          <UserTable
+            users={users.filter(user => user.country === "Syria")}
+            onAddBalance={openAddBalanceDialog}
+          />
+        </TabsContent>
+      </Tabs>
 
-        {filteredUsers.length === 0 && (
-          <div className="col-span-full text-center py-10 text-muted-foreground">
-            No users found matching your search.
+      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Add Balance for {selectedUser?.name}</DialogTitle>
+          </DialogHeader>
+
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="current-balance">Current Balance</Label>
+              <div className="flex items-center">
+                <DollarSign className="h-4 w-4 text-muted-foreground mr-1" />
+                <span className="font-medium">${selectedUser?.balance.toFixed(2)}</span>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="amount">Amount to Add</Label>
+              <div className="relative">
+                <DollarSign className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                <Input
+                  id="amount"
+                  placeholder="0.00"
+                  value={amountToAdd}
+                  onChange={(e) => setAmountToAdd(e.target.value)}
+                  className="pl-10"
+                  type="number"
+                  min="0"
+                  step="0.01"
+                />
+              </div>
+            </div>
           </div>
-        )}
-      </div>
+
+          <div className="flex justify-end gap-2">
+            <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleAddBalance}>
+              Add Balance
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
+  )
+}
+
+interface UserTableProps {
+  users: User[]
+  onAddBalance: (user: User) => void
+}
+
+function UserTable({ users, onAddBalance }: UserTableProps) {
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Users</CardTitle>
+      </CardHeader>
+      <CardContent>
+        {users.length === 0 ? (
+          <p className="text-center py-4 text-muted-foreground">No users found</p>
+        ) : (
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Name</TableHead>
+                <TableHead>Phone</TableHead>
+                <TableHead>Country</TableHead>
+                <TableHead>Balance</TableHead>
+                <TableHead>Role</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {users.map((user) => (
+                <TableRow key={user.id}>
+                  <TableCell className="font-medium">{user.name}</TableCell>
+                  <TableCell>{user.phone}</TableCell>
+                  <TableCell>
+                    <div className="flex items-center">
+                      <MapPin className="h-4 w-4 text-muted-foreground mr-1" />
+                      {user.country}
+                    </div>
+                  </TableCell>
+                  <TableCell>${user.balance.toFixed(2)}</TableCell>
+                  <TableCell>
+                    <span className={`inline-block px-2 py-1 rounded-full text-xs font-medium ${user.role === 'ADMIN'
+                        ? 'bg-blue-100 text-blue-800'
+                        : 'bg-green-100 text-green-800'
+                      }`}>
+                      {user.role}
+                    </span>
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => onAddBalance(user)}
+                    >
+                      <DollarSign className="h-4 w-4 mr-1" />
+                      Add Balance
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        )}
+      </CardContent>
+    </Card>
   )
 }
