@@ -18,12 +18,13 @@ export async function GET(request: NextRequest) {
     // Get fresh balance from database
     const userData = await prisma.user.findUnique({
       where: { id: user.id },
-      select: { balance: true }
+      select: { balance: true, outstandingDebt: true }
     })
     
     return NextResponse.json({
       success: true,
-      balance: userData?.balance || 0
+      balance: userData?.balance || 0,
+      outstandingDebt: userData?.outstandingDebt || 0
     })
   } catch (error) {
     console.error('Error fetching balance:', error)

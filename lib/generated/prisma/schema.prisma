@@ -15,18 +15,19 @@ datasource db {
 }
 
 model User {
-  id         String   @id @default(cuid())
-  name       String
-  phone      String   @unique
-  password   String
-  country    String // "Iraq" or "Syria"
-  role       Role     @default(USER)
-  balance    Float    @default(0)
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-  isVerified Boolean  @default(true)
-  cart       Cart?
-  orders     Order[]
+  id              String   @id @default(cuid())
+  name            String
+  phone           String   @unique
+  password        String
+  country         String // "Iraq" or "Syria"
+  role            Role     @default(USER)
+  balance         Float    @default(0)
+  outstandingDebt Float    @default(0)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  isVerified      Boolean  @default(true)
+  cart            Cart?
+  orders          Order[]
 }
 
 enum Role {
@@ -95,15 +96,17 @@ model OrderItem {
 
 enum OrderStatus {
   PENDING
+  PENDING_PAYMENT
   COMPLETED
   CANCELLED
 }
 
 model PettyCash {
-  id          String   @id @default(cuid())
-  amount      Float
-  description String
-  type        String // "INCOME" or "EXPENSE"
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id             String   @id @default(cuid())
+  amount         Float
+  description    String
+  type           String // "INCOME", "EXPENSE", or "PENDING_INCOME"
+  relatedOrderId String? // Optional reference to an order
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 }

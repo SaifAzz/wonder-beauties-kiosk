@@ -91,8 +91,8 @@ export async function POST(request: NextRequest) {
     
     // Check stock for each product and calculate total
     let total = 0
-    const itemsToCreate = []
-    const productsToUpdate = []
+    const itemsToCreate: { productId: any; quantity: any; price: any }[] = []
+    const productsToUpdate: { id: any; newQuantity: number }[] = []
     
     for (const item of cart.items) {
       if (item.product.quantity < item.quantity) {
@@ -123,24 +123,20 @@ export async function POST(request: NextRequest) {
       })
     }
     
-    // Check if user has enough balance
-    if (user.balance < total) {
-      return NextResponse.json(
-        { 
-          success: false, 
-          message: `Insufficient balance. Order total is $${total.toFixed(2)} but your balance is $${user.balance.toFixed(2)}.` 
-        },
-        { status: 400 }
-      )
-    }
+    // Calculate how much to change balance
+    const balanceDeduction = user.balance >= total ? total : user.balance
+    const remainingDebt = total - balanceDeduction
+    const newBalance = user.balance - balanceDeduction
+    const hasPendingDebt = remainingDebt > 0
     
     // Start a transaction
     const order = await prisma.$transaction(async (prisma) => {
-      // 1. Create the order
-      const order = await prisma.order.create({
+      // 1. Create the order with pending payment status if there's debt
+      const newOrder = await prisma.order.create({
         data: {
           userId: user.id,
           total,
+          status: hasPendingDebt ? 'PENDING_PAYMENT' : 'COMPLETED',
           items: {
             create: itemsToCreate
           }
@@ -162,33 +158,60 @@ export async function POST(request: NextRequest) {
         })
       }
       
-      // 3. Deduct from user balance
+      // 3. Update user balance and debt
       await prisma.user.update({
         where: { id: user.id },
-        data: { balance: user.balance - total }
-      })
-      
-      // 4. Record a petty cash entry
-      await prisma.pettyCash.create({
-        data: {
-          amount: total,
-          description: `Order ${order.id} by ${user.name}`,
-          type: 'INCOME'
+        data: { 
+          balance: newBalance,
+          outstandingDebt: (user.outstandingDebt || 0) + remainingDebt
         }
       })
       
+      // 4. Record petty cash entries
+      // Record actual payment if any balance was used
+      if (balanceDeduction > 0) {
+        await prisma.pettyCash.create({
+          data: {
+            amount: balanceDeduction,
+            description: `Partial payment for Order ${newOrder.id} by ${user.name}`,
+            type: 'INCOME'
+          }
+        })
+      }
+      
+      // Record pending payment as a separate transaction if there's debt
+      if (remainingDebt > 0) {
+        await prisma.pettyCash.create({
+          data: {
+            amount: remainingDebt,
+            description: `Pending payment for Order ${newOrder.id} by ${user.name}`,
+            type: 'PENDING_INCOME',
+            relatedOrderId: newOrder.id
+          }
+        })
+      }
+      
       // 5. Clear the cart
-      await prisma.cartItem.deleteMany({
-        where: { cartId: cart.id }
+      await prisma.cart.update({
+        where: { id: cart.id },
+        data: {
+          items: {
+            deleteMany: {}
+          }
+        }
       })
       
-      return order
+      return newOrder
     })
     
     return NextResponse.json({
       success: true,
       order,
-      message: 'Order placed successfully'
+      hasPendingDebt,
+      remainingDebt,
+      message: hasPendingDebt 
+        ? `Order placed successfully. You have a pending payment of $${remainingDebt.toFixed(2)}.`
+        : 'Order placed successfully'
     })
   } catch (error) {
     console.error('Error creating order:', error)

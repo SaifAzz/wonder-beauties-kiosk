@@ -46,6 +46,7 @@ export default function CartPage() {
     const [isUpdating, setIsUpdating] = useState(false)
     const [isCheckingOut, setIsCheckingOut] = useState(false)
     const [userBalance, setUserBalance] = useState(0)
+    const [userOutstandingDebt, setUserOutstandingDebt] = useState(0)
     const { toast } = useToast()
     const router = useRouter()
 
@@ -69,6 +70,7 @@ export default function CartPage() {
                     const balanceData = await balanceResponse.json()
                     if (balanceData.success) {
                         setUserBalance(balanceData.balance)
+                        setUserOutstandingDebt(balanceData.outstandingDebt || 0)
                     }
                 }
             } catch (error) {
@@ -233,10 +235,17 @@ export default function CartPage() {
             const data = await response.json()
 
             if (data.success) {
-                toast({
-                    title: "Order placed!",
-                    description: "Your order has been placed successfully",
-                })
+                if (data.hasPendingDebt) {
+                    toast({
+                        title: "Order placed with pending payment",
+                        description: data.message,
+                    })
+                } else {
+                    toast({
+                        title: "Order placed!",
+                        description: "Your order has been placed successfully",
+                    })
+                }
 
                 // Clear cart and redirect
                 setCart(prev => prev ? { ...prev, items: [] } : prev)
@@ -251,13 +260,22 @@ export default function CartPage() {
         } catch (error) {
             console.error("Error during checkout:", error)
             toast({
-                title: "Error",
-                description: "Failed to complete checkout",
+                title: "Checkout failed",
+                description: "An error occurred during checkout. Please try again.",
                 variant: "destructive",
             })
         } finally {
             setIsCheckingOut(false)
         }
+    }
+
+    // Calculate total cost of items in cart
+    const calculateTotal = () => {
+        if (!cart || cart.items.length === 0) return 0
+
+        return cart.items.reduce((total, item) => {
+            return total + (item.quantity * item.product.price)
+        }, 0)
     }
 
     // Calculate cart total
@@ -268,6 +286,46 @@ export default function CartPage() {
 
     // Check if we have enough balance
     const hasEnoughBalance = userBalance >= cartTotal
+
+    // Update the UI to show balance/debt information
+    const renderUserAccount = () => {
+        const cartTotal = calculateTotal()
+        const willCreateDebt = cartTotal > userBalance
+        const newDebtAmount = willCreateDebt ? cartTotal - userBalance : 0
+        const totalDebtAfterOrder = userOutstandingDebt + newDebtAmount
+
+        return (
+            <div className="mb-6 p-4 border rounded-md bg-background">
+                <h3 className="text-lg font-semibold mb-2">Your Account</h3>
+                <div className="space-y-2">
+                    <div className="flex justify-between">
+                        <span>Current Balance:</span>
+                        <span className="font-medium">${userBalance.toFixed(2)}</span>
+                    </div>
+
+                    {userOutstandingDebt > 0 && (
+                        <div className="flex justify-between">
+                            <span>Outstanding Debt:</span>
+                            <span className="font-medium text-red-500">${userOutstandingDebt.toFixed(2)}</span>
+                        </div>
+                    )}
+
+                    {willCreateDebt && (
+                        <>
+                            <div className="flex justify-between text-amber-600">
+                                <span>New Debt from Order:</span>
+                                <span className="font-medium">${newDebtAmount.toFixed(2)}</span>
+                            </div>
+                            <div className="flex justify-between text-red-500 font-semibold border-t pt-2">
+                                <span>Total Debt After Order:</span>
+                                <span>${totalDebtAfterOrder.toFixed(2)}</span>
+                            </div>
+                        </>
+                    )}
+                </div>
+            </div>
+        )
+    }
 
     if (loading) {
         return (
@@ -281,25 +339,26 @@ export default function CartPage() {
     if (!cart || cart.items.length === 0) {
         return (
             <div className="container py-10">
-                <h1 className="text-3xl font-bold mb-8">Your Cart</h1>
+                <div className="flex justify-between items-center mb-8">
+                    <h1 className="text-3xl font-bold">Your Cart</h1>
+                    <Button asChild variant="outline">
+                        <Link href="/catalog">
+                            <ArrowLeft className="mr-2 h-4 w-4" />
+                            Back to Catalog
+                        </Link>
+                    </Button>
+                </div>
 
-                <Card className="text-center py-12">
-                    <CardContent>
-                        <div className="flex flex-col items-center justify-center">
-                            <ShoppingCart className="h-12 w-12 text-muted-foreground mb-4" />
-                            <h2 className="text-2xl font-semibold mb-2">Your cart is empty</h2>
-                            <p className="text-muted-foreground mb-6">
-                                Add some products to your cart to get started
-                            </p>
-                            <Button asChild>
-                                <Link href="/catalog">
-                                    <ArrowLeft className="mr-2 h-4 w-4" />
-                                    Browse Products
-                                </Link>
-                            </Button>
-                        </div>
-                    </CardContent>
-                </Card>
+                <Alert className="mb-8">
+                    <AlertTitle>Your cart is empty</AlertTitle>
+                    <AlertDescription>
+                        You haven't added any products to your cart yet. Visit the catalog to find delicious treats!
+                    </AlertDescription>
+                </Alert>
+
+                <Button asChild>
+                    <Link href="/catalog">Browse Products</Link>
+                </Button>
             </div>
         )
     }
@@ -308,24 +367,86 @@ export default function CartPage() {
         <div className="container py-10">
             <div className="flex justify-between items-center mb-8">
                 <h1 className="text-3xl font-bold">Your Cart</h1>
-                <div className="flex gap-2">
-                    <Button variant="outline" asChild>
-                        <Link href="/catalog">
-                            <ArrowLeft className="mr-2 h-4 w-4" />
-                            Continue Shopping
-                        </Link>
-                    </Button>
+                <Button asChild variant="outline">
+                    <Link href="/catalog">
+                        <ArrowLeft className="mr-2 h-4 w-4" />
+                        Back to Catalog
+                    </Link>
+                </Button>
+            </div>
 
+            {renderUserAccount()}
+
+            <Card className="mb-6">
+                <CardHeader>
+                    <CardTitle>Items</CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <Table>
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead>Product</TableHead>
+                                <TableHead>Price</TableHead>
+                                <TableHead>Quantity</TableHead>
+                                <TableHead>Subtotal</TableHead>
+                                <TableHead></TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            {cart?.items.map((item) => (
+                                <TableRow key={item.id}>
+                                    <TableCell className="font-medium">{item.product.name}</TableCell>
+                                    <TableCell>${item.product.price.toFixed(2)}</TableCell>
+                                    <TableCell>
+                                        <div className="flex items-center">
+                                            <Button
+                                                variant="outline"
+                                                size="icon"
+                                                className="h-8 w-8"
+                                                onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                                                disabled={isUpdating || item.quantity <= 1}
+                                            >
+                                                <Minus className="h-4 w-4" />
+                                            </Button>
+                                            <span className="mx-3">{item.quantity}</span>
+                                            <Button
+                                                variant="outline"
+                                                size="icon"
+                                                className="h-8 w-8"
+                                                onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                                                disabled={isUpdating || item.quantity >= item.product.quantity}
+                                            >
+                                                <Plus className="h-4 w-4" />
+                                            </Button>
+                                        </div>
+                                    </TableCell>
+                                    <TableCell>${(item.product.price * item.quantity).toFixed(2)}</TableCell>
+                                    <TableCell>
+                                        <Button
+                                            variant="ghost"
+                                            size="icon"
+                                            onClick={() => removeItem(item.id)}
+                                            disabled={isUpdating}
+                                        >
+                                            <Trash2 className="h-4 w-4" />
+                                        </Button>
+                                    </TableCell>
+                                </TableRow>
+                            ))}
+                        </TableBody>
+                    </Table>
+                </CardContent>
+                <CardFooter className="flex justify-between">
                     <AlertDialog>
                         <AlertDialogTrigger asChild>
-                            <Button variant="destructive" disabled={cart.items.length === 0 || isUpdating}>
+                            <Button variant="outline" disabled={isUpdating}>
                                 <Trash2 className="mr-2 h-4 w-4" />
                                 Clear Cart
                             </Button>
                         </AlertDialogTrigger>
                         <AlertDialogContent>
                             <AlertDialogHeader>
-                                <AlertDialogTitle>Clear cart?</AlertDialogTitle>
+                                <AlertDialogTitle>Clear your cart?</AlertDialogTitle>
                                 <AlertDialogDescription>
                                     This will remove all items from your cart. This action cannot be undone.
                                 </AlertDialogDescription>
@@ -336,121 +457,26 @@ export default function CartPage() {
                             </AlertDialogFooter>
                         </AlertDialogContent>
                     </AlertDialog>
-                </div>
-            </div>
+                    <div className="text-xl font-bold">
+                        Total: ${calculateTotal().toFixed(2)}
+                    </div>
+                </CardFooter>
+            </Card>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <div className="lg:col-span-2">
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>Cart Items</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <Table>
-                                <TableHeader>
-                                    <TableRow>
-                                        <TableHead>Product</TableHead>
-                                        <TableHead>Quantity</TableHead>
-                                        <TableHead>Price</TableHead>
-                                        <TableHead className="text-right">Subtotal</TableHead>
-                                        <TableHead></TableHead>
-                                    </TableRow>
-                                </TableHeader>
-                                <TableBody>
-                                    {cart.items.map((item) => (
-                                        <TableRow key={item.id}>
-                                            <TableCell className="font-medium">{item.product.name}</TableCell>
-                                            <TableCell>
-                                                <div className="flex items-center space-x-2">
-                                                    <Button
-                                                        variant="outline"
-                                                        size="icon"
-                                                        className="h-8 w-8 rounded-full"
-                                                        onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                                                        disabled={isUpdating}
-                                                    >
-                                                        <Minus className="h-3 w-3" />
-                                                    </Button>
-                                                    <span>{item.quantity}</span>
-                                                    <Button
-                                                        variant="outline"
-                                                        size="icon"
-                                                        className="h-8 w-8 rounded-full"
-                                                        onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                                                        disabled={isUpdating || item.quantity >= item.product.quantity}
-                                                    >
-                                                        <Plus className="h-3 w-3" />
-                                                    </Button>
-                                                </div>
-                                            </TableCell>
-                                            <TableCell>${item.product.price.toFixed(2)}</TableCell>
-                                            <TableCell className="text-right font-medium">
-                                                ${(item.quantity * item.product.price).toFixed(2)}
-                                            </TableCell>
-                                            <TableCell>
-                                                <Button
-                                                    variant="ghost"
-                                                    size="sm"
-                                                    className="text-destructive hover:text-destructive"
-                                                    onClick={() => removeItem(item.id)}
-                                                    disabled={isUpdating}
-                                                >
-                                                    <Trash2 className="h-4 w-4" />
-                                                </Button>
-                                            </TableCell>
-                                        </TableRow>
-                                    ))}
-                                </TableBody>
-                            </Table>
-                        </CardContent>
-                    </Card>
-                </div>
-
-                <div>
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>Order Summary</CardTitle>
-                        </CardHeader>
-                        <CardContent className="space-y-4">
-                            <div className="flex justify-between">
-                                <span className="text-muted-foreground">Subtotal</span>
-                                <span>${cartTotal.toFixed(2)}</span>
-                            </div>
-                            <div className="flex justify-between font-bold text-lg border-t pt-4">
-                                <span>Total</span>
-                                <span>${cartTotal.toFixed(2)}</span>
-                            </div>
-
-                            <div className="flex justify-between text-sm">
-                                <span className="text-muted-foreground">Your Balance</span>
-                                <span>${userBalance.toFixed(2)}</span>
-                            </div>
-                        </CardContent>
-                        <CardFooter className="flex flex-col gap-4">
-                            {!hasEnoughBalance && (
-                                <Alert variant="destructive" className="mb-2">
-                                    <AlertTitle>Insufficient balance</AlertTitle>
-                                    <AlertDescription>
-                                        You need ${(cartTotal - userBalance).toFixed(2)} more to complete this purchase.
-                                    </AlertDescription>
-                                </Alert>
-                            )}
-
-                            <Button
-                                className="w-full"
-                                disabled={cart.items.length === 0 || isCheckingOut || !hasEnoughBalance}
-                                onClick={checkout}
-                            >
-                                <CreditCard className="mr-2 h-4 w-4" />
-                                {isCheckingOut ? "Processing..." : "Checkout"}
-                            </Button>
-
-                            <p className="text-xs text-center text-muted-foreground">
-                                By completing this purchase, the amount will be deducted from your account balance.
-                            </p>
-                        </CardFooter>
-                    </Card>
-                </div>
+            <div className="flex justify-between">
+                <Button asChild variant="outline">
+                    <Link href="/catalog">
+                        <ArrowLeft className="mr-2 h-4 w-4" />
+                        Continue Shopping
+                    </Link>
+                </Button>
+                <Button
+                    onClick={checkout}
+                    disabled={isCheckingOut || !cart?.items.length}
+                >
+                    <CreditCard className="mr-2 h-4 w-4" />
+                    {calculateTotal() > userBalance ? "Checkout (On Credit)" : "Checkout"}
+                </Button>
             </div>
         </div>
     )

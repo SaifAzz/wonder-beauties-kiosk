@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label"
 import { useToast } from "@/components/ui/use-toast"
 import { Skeleton } from "@/components/ui/skeleton"
 import { ShoppingCart, DollarSign, SmilePlus } from "lucide-react"
+import { motion } from "framer-motion"
 
 interface Product {
   id: string
@@ -27,6 +28,7 @@ export default function CatalogPage() {
   const [loading, setLoading] = useState(true)
   const [userCountry, setUserCountry] = useState<string | null>(null)
   const [searchTerm, setSearchTerm] = useState("")
+  const [animatingProductId, setAnimatingProductId] = useState<string | null>(null)
   const { toast } = useToast()
   const router = useRouter()
 
@@ -91,6 +93,9 @@ export default function CatalogPage() {
 
   const addToCart = async (productId: string) => {
     try {
+      // Set the animating product ID to trigger animation
+      setAnimatingProductId(productId)
+
       const response = await fetch("/api/cart", {
         method: "POST",
         headers: {
@@ -112,12 +117,18 @@ export default function CatalogPage() {
             </Button>
           ),
         })
+
+        // Clear the animation after a timeout
+        setTimeout(() => {
+          setAnimatingProductId(null)
+        }, 1000)
       } else {
         toast({
           title: "Error",
           description: data.message || "Could not add to cart",
           variant: "destructive",
         })
+        setAnimatingProductId(null)
       }
     } catch (error) {
       console.error("Error adding to cart:", error)
@@ -126,6 +137,7 @@ export default function CatalogPage() {
         description: "Failed to add product to cart",
         variant: "destructive",
       })
+      setAnimatingProductId(null)
     }
   }
 
@@ -197,49 +209,94 @@ export default function CatalogPage() {
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
           {filteredProducts.map((product) => (
-            <Card key={product.id} className="flex flex-col">
-              <CardHeader>
-                <CardTitle>{product.name}</CardTitle>
-                <p className="text-sm text-muted-foreground">
-                  {product.country}
-                </p>
-              </CardHeader>
-              <CardContent className="flex-grow">
-                {product.image && (
-                  <div className="aspect-square mb-4 overflow-hidden rounded-md">
-                    <img
-                      src={product.image}
-                      alt={product.name}
-                      className="object-cover w-full h-full"
-                    />
-                  </div>
-                )}
-                <div className="flex items-center mb-2">
-                  <DollarSign className="h-4 w-4 text-muted-foreground mr-1" />
-                  <span className="font-semibold">${product.price.toFixed(2)}</span>
-                </div>
-                {product.description && (
-                  <p className="text-sm text-muted-foreground">{product.description}</p>
-                )}
-                <p className="text-sm mt-2">
-                  {product.quantity > 0 ? (
-                    `${product.quantity} in stock`
-                  ) : (
-                    <span className="text-destructive">Out of stock</span>
+            <motion.div
+              key={product.id}
+              animate={
+                animatingProductId === product.id
+                  ? {
+                    scale: [1, 1.05, 1],
+                    transition: { duration: 0.5 }
+                  }
+                  : {}
+              }
+            >
+              <Card className="flex flex-col h-full">
+                <CardHeader>
+                  <CardTitle>{product.name}</CardTitle>
+                  <p className="text-sm text-muted-foreground">
+                    {product.country}
+                  </p>
+                </CardHeader>
+                <CardContent className="flex-grow">
+                  {product.image && (
+                    <div className="aspect-square mb-4 overflow-hidden rounded-md">
+                      <motion.img
+                        src={product.image}
+                        alt={product.name}
+                        className="object-cover w-full h-full"
+                        animate={
+                          animatingProductId === product.id
+                            ? {
+                              scale: [1, 1.15, 1],
+                              transition: { duration: 0.5 }
+                            }
+                            : {}
+                        }
+                      />
+                    </div>
                   )}
-                </p>
-              </CardContent>
-              <CardFooter>
-                <Button
-                  className="w-full"
-                  onClick={() => addToCart(product.id)}
-                  disabled={product.quantity <= 0}
-                >
-                  <SmilePlus className="mr-2 h-4 w-4" />
-                  Add to Cart
-                </Button>
-              </CardFooter>
-            </Card>
+                  <div className="flex items-center mb-2">
+                    <DollarSign className="h-4 w-4 text-muted-foreground mr-1" />
+                    <span className="font-semibold">${product.price.toFixed(2)}</span>
+                  </div>
+                  {product.description && (
+                    <p className="text-sm text-muted-foreground">{product.description}</p>
+                  )}
+                  <p className="text-sm mt-2">
+                    {product.quantity > 0 ? (
+                      `${product.quantity} in stock`
+                    ) : (
+                      <span className="text-destructive">Out of stock</span>
+                    )}
+                  </p>
+                </CardContent>
+                <CardFooter>
+                  <Button
+                    className="w-full relative overflow-hidden"
+                    onClick={() => addToCart(product.id)}
+                    disabled={product.quantity <= 0}
+                  >
+                    <SmilePlus className="mr-2 h-4 w-4" />
+                    Add to Cart
+
+                    {animatingProductId === product.id && (
+                      <motion.div
+                        className="absolute inset-0 flex items-center justify-center bg-primary/20"
+                        initial={{ opacity: 0 }}
+                        animate={{
+                          opacity: [0, 1, 0.8],
+                        }}
+                        transition={{ duration: 1.5 }}
+                      >
+                        <motion.span
+                          className="text-xl font-bold text-white drop-shadow-md"
+                          initial={{ y: 0, opacity: 0 }}
+                          animate={{
+                            y: [-5, -20],
+                            opacity: [0, 1],
+                            scale: [0.8, 1.2]
+                          }}
+                          transition={{ duration: 0.8 }}
+                          exit={{ opacity: 0, transition: { delay: 1.5, duration: 0.5 } }}
+                        >
+                          😋 صحة وعافية!!
+                        </motion.span>
+                      </motion.div>
+                    )}
+                  </Button>
+                </CardFooter>
+              </Card>
+            </motion.div>
           ))}
         </div>
       )}

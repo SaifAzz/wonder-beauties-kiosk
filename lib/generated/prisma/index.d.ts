@@ -63,6 +63,7 @@ export type Role = (typeof Role)[keyof typeof Role]
 
 export const OrderStatus: {
   PENDING: 'PENDING',
+  PENDING_PAYMENT: 'PENDING_PAYMENT',
   COMPLETED: 'COMPLETED',
   CANCELLED: 'CANCELLED'
 };
@@ -1591,10 +1592,12 @@ export namespace Prisma {
 
   export type UserAvgAggregateOutputType = {
     balance: number | null
+    outstandingDebt: number | null
   }
 
   export type UserSumAggregateOutputType = {
     balance: number | null
+    outstandingDebt: number | null
   }
 
   export type UserMinAggregateOutputType = {
@@ -1605,6 +1608,7 @@ export namespace Prisma {
     country: string | null
     role: $Enums.Role | null
     balance: number | null
+    outstandingDebt: number | null
     createdAt: Date | null
     updatedAt: Date | null
     isVerified: boolean | null
@@ -1618,6 +1622,7 @@ export namespace Prisma {
     country: string | null
     role: $Enums.Role | null
     balance: number | null
+    outstandingDebt: number | null
     createdAt: Date | null
     updatedAt: Date | null
     isVerified: boolean | null
@@ -1631,6 +1636,7 @@ export namespace Prisma {
     country: number
     role: number
     balance: number
+    outstandingDebt: number
     createdAt: number
     updatedAt: number
     isVerified: number
@@ -1640,10 +1646,12 @@ export namespace Prisma {
 
   export type UserAvgAggregateInputType = {
     balance?: true
+    outstandingDebt?: true
   }
 
   export type UserSumAggregateInputType = {
     balance?: true
+    outstandingDebt?: true
   }
 
   export type UserMinAggregateInputType = {
@@ -1654,6 +1662,7 @@ export namespace Prisma {
     country?: true
     role?: true
     balance?: true
+    outstandingDebt?: true
     createdAt?: true
     updatedAt?: true
     isVerified?: true
@@ -1667,6 +1676,7 @@ export namespace Prisma {
     country?: true
     role?: true
     balance?: true
+    outstandingDebt?: true
     createdAt?: true
     updatedAt?: true
     isVerified?: true
@@ -1680,6 +1690,7 @@ export namespace Prisma {
     country?: true
     role?: true
     balance?: true
+    outstandingDebt?: true
     createdAt?: true
     updatedAt?: true
     isVerified?: true
@@ -1780,6 +1791,7 @@ export namespace Prisma {
     country: string
     role: $Enums.Role
     balance: number
+    outstandingDebt: number
     createdAt: Date
     updatedAt: Date
     isVerified: boolean
@@ -1812,6 +1824,7 @@ export namespace Prisma {
     country?: boolean
     role?: boolean
     balance?: boolean
+    outstandingDebt?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     isVerified?: boolean
@@ -1828,6 +1841,7 @@ export namespace Prisma {
     country?: boolean
     role?: boolean
     balance?: boolean
+    outstandingDebt?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     isVerified?: boolean
@@ -1841,6 +1855,7 @@ export namespace Prisma {
     country?: boolean
     role?: boolean
     balance?: boolean
+    outstandingDebt?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     isVerified?: boolean
@@ -1854,12 +1869,13 @@ export namespace Prisma {
     country?: boolean
     role?: boolean
     balance?: boolean
+    outstandingDebt?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     isVerified?: boolean
   }
 
-  export type UserOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "phone" | "password" | "country" | "role" | "balance" | "createdAt" | "updatedAt" | "isVerified", ExtArgs["result"]["user"]>
+  export type UserOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "phone" | "password" | "country" | "role" | "balance" | "outstandingDebt" | "createdAt" | "updatedAt" | "isVerified", ExtArgs["result"]["user"]>
   export type UserInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     cart?: boolean | User$cartArgs<ExtArgs>
     orders?: boolean | User$ordersArgs<ExtArgs>
@@ -1882,6 +1898,7 @@ export namespace Prisma {
       country: string
       role: $Enums.Role
       balance: number
+      outstandingDebt: number
       createdAt: Date
       updatedAt: Date
       isVerified: boolean
@@ -2317,6 +2334,7 @@ export namespace Prisma {
     readonly country: FieldRef<"User", 'String'>
     readonly role: FieldRef<"User", 'Role'>
     readonly balance: FieldRef<"User", 'Float'>
+    readonly outstandingDebt: FieldRef<"User", 'Float'>
     readonly createdAt: FieldRef<"User", 'DateTime'>
     readonly updatedAt: FieldRef<"User", 'DateTime'>
     readonly isVerified: FieldRef<"User", 'Boolean'>
@@ -8423,6 +8441,7 @@ export namespace Prisma {
     amount: number | null
     description: string | null
     type: string | null
+    relatedOrderId: string | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -8432,6 +8451,7 @@ export namespace Prisma {
     amount: number | null
     description: string | null
     type: string | null
+    relatedOrderId: string | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -8441,6 +8461,7 @@ export namespace Prisma {
     amount: number
     description: number
     type: number
+    relatedOrderId: number
     createdAt: number
     updatedAt: number
     _all: number
@@ -8460,6 +8481,7 @@ export namespace Prisma {
     amount?: true
     description?: true
     type?: true
+    relatedOrderId?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -8469,6 +8491,7 @@ export namespace Prisma {
     amount?: true
     description?: true
     type?: true
+    relatedOrderId?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -8478,6 +8501,7 @@ export namespace Prisma {
     amount?: true
     description?: true
     type?: true
+    relatedOrderId?: true
     createdAt?: true
     updatedAt?: true
     _all?: true
@@ -8574,6 +8598,7 @@ export namespace Prisma {
     amount: number
     description: string
     type: string
+    relatedOrderId: string | null
     createdAt: Date
     updatedAt: Date
     _count: PettyCashCountAggregateOutputType | null
@@ -8602,6 +8627,7 @@ export namespace Prisma {
     amount?: boolean
     description?: boolean
     type?: boolean
+    relatedOrderId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }, ExtArgs["result"]["pettyCash"]>
@@ -8611,6 +8637,7 @@ export namespace Prisma {
     amount?: boolean
     description?: boolean
     type?: boolean
+    relatedOrderId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }, ExtArgs["result"]["pettyCash"]>
@@ -8620,6 +8647,7 @@ export namespace Prisma {
     amount?: boolean
     description?: boolean
     type?: boolean
+    relatedOrderId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }, ExtArgs["result"]["pettyCash"]>
@@ -8629,11 +8657,12 @@ export namespace Prisma {
     amount?: boolean
     description?: boolean
     type?: boolean
+    relatedOrderId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
 
-  export type PettyCashOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "amount" | "description" | "type" | "createdAt" | "updatedAt", ExtArgs["result"]["pettyCash"]>
+  export type PettyCashOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "amount" | "description" | "type" | "relatedOrderId" | "createdAt" | "updatedAt", ExtArgs["result"]["pettyCash"]>
 
   export type $PettyCashPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "PettyCash"
@@ -8643,6 +8672,7 @@ export namespace Prisma {
       amount: number
       description: string
       type: string
+      relatedOrderId: string | null
       createdAt: Date
       updatedAt: Date
     }, ExtArgs["result"]["pettyCash"]>
@@ -9072,6 +9102,7 @@ export namespace Prisma {
     readonly amount: FieldRef<"PettyCash", 'Float'>
     readonly description: FieldRef<"PettyCash", 'String'>
     readonly type: FieldRef<"PettyCash", 'String'>
+    readonly relatedOrderId: FieldRef<"PettyCash", 'String'>
     readonly createdAt: FieldRef<"PettyCash", 'DateTime'>
     readonly updatedAt: FieldRef<"PettyCash", 'DateTime'>
   }
@@ -9457,6 +9488,7 @@ export namespace Prisma {
     country: 'country',
     role: 'role',
     balance: 'balance',
+    outstandingDebt: 'outstandingDebt',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt',
     isVerified: 'isVerified'
@@ -9532,6 +9564,7 @@ export namespace Prisma {
     amount: 'amount',
     description: 'description',
     type: 'type',
+    relatedOrderId: 'relatedOrderId',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
   };
@@ -9623,6 +9656,7 @@ export namespace Prisma {
     country?: StringFilter<"User"> | string
     role?: EnumRoleFilter<"User"> | $Enums.Role
     balance?: FloatFilter<"User"> | number
+    outstandingDebt?: FloatFilter<"User"> | number
     createdAt?: DateTimeFilter<"User"> | Date | string
     updatedAt?: DateTimeFilter<"User"> | Date | string
     isVerified?: BoolFilter<"User"> | boolean
@@ -9638,6 +9672,7 @@ export namespace Prisma {
     country?: SortOrder
     role?: SortOrder
     balance?: SortOrder
+    outstandingDebt?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     isVerified?: SortOrder
@@ -9656,6 +9691,7 @@ export namespace Prisma {
     country?: StringFilter<"User"> | string
     role?: EnumRoleFilter<"User"> | $Enums.Role
     balance?: FloatFilter<"User"> | number
+    outstandingDebt?: FloatFilter<"User"> | number
     createdAt?: DateTimeFilter<"User"> | Date | string
     updatedAt?: DateTimeFilter<"User"> | Date | string
     isVerified?: BoolFilter<"User"> | boolean
@@ -9671,6 +9707,7 @@ export namespace Prisma {
     country?: SortOrder
     role?: SortOrder
     balance?: SortOrder
+    outstandingDebt?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     isVerified?: SortOrder
@@ -9692,6 +9729,7 @@ export namespace Prisma {
     country?: StringWithAggregatesFilter<"User"> | string
     role?: EnumRoleWithAggregatesFilter<"User"> | $Enums.Role
     balance?: FloatWithAggregatesFilter<"User"> | number
+    outstandingDebt?: FloatWithAggregatesFilter<"User"> | number
     createdAt?: DateTimeWithAggregatesFilter<"User"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"User"> | Date | string
     isVerified?: BoolWithAggregatesFilter<"User"> | boolean
@@ -10039,6 +10077,7 @@ export namespace Prisma {
     amount?: FloatFilter<"PettyCash"> | number
     description?: StringFilter<"PettyCash"> | string
     type?: StringFilter<"PettyCash"> | string
+    relatedOrderId?: StringNullableFilter<"PettyCash"> | string | null
     createdAt?: DateTimeFilter<"PettyCash"> | Date | string
     updatedAt?: DateTimeFilter<"PettyCash"> | Date | string
   }
@@ -10048,6 +10087,7 @@ export namespace Prisma {
     amount?: SortOrder
     description?: SortOrder
     type?: SortOrder
+    relatedOrderId?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -10060,6 +10100,7 @@ export namespace Prisma {
     amount?: FloatFilter<"PettyCash"> | number
     description?: StringFilter<"PettyCash"> | string
     type?: StringFilter<"PettyCash"> | string
+    relatedOrderId?: StringNullableFilter<"PettyCash"> | string | null
     createdAt?: DateTimeFilter<"PettyCash"> | Date | string
     updatedAt?: DateTimeFilter<"PettyCash"> | Date | string
   }, "id">
@@ -10069,6 +10110,7 @@ export namespace Prisma {
     amount?: SortOrder
     description?: SortOrder
     type?: SortOrder
+    relatedOrderId?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     _count?: PettyCashCountOrderByAggregateInput
@@ -10086,6 +10128,7 @@ export namespace Prisma {
     amount?: FloatWithAggregatesFilter<"PettyCash"> | number
     description?: StringWithAggregatesFilter<"PettyCash"> | string
     type?: StringWithAggregatesFilter<"PettyCash"> | string
+    relatedOrderId?: StringNullableWithAggregatesFilter<"PettyCash"> | string | null
     createdAt?: DateTimeWithAggregatesFilter<"PettyCash"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"PettyCash"> | Date | string
   }
@@ -10098,6 +10141,7 @@ export namespace Prisma {
     country: string
     role?: $Enums.Role
     balance?: number
+    outstandingDebt?: number
     createdAt?: Date | string
     updatedAt?: Date | string
     isVerified?: boolean
@@ -10113,6 +10157,7 @@ export namespace Prisma {
     country: string
     role?: $Enums.Role
     balance?: number
+    outstandingDebt?: number
     createdAt?: Date | string
     updatedAt?: Date | string
     isVerified?: boolean
@@ -10128,6 +10173,7 @@ export namespace Prisma {
     country?: StringFieldUpdateOperationsInput | string
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
     balance?: FloatFieldUpdateOperationsInput | number
+    outstandingDebt?: FloatFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     isVerified?: BoolFieldUpdateOperationsInput | boolean
@@ -10143,6 +10189,7 @@ export namespace Prisma {
     country?: StringFieldUpdateOperationsInput | string
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
     balance?: FloatFieldUpdateOperationsInput | number
+    outstandingDebt?: FloatFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     isVerified?: BoolFieldUpdateOperationsInput | boolean
@@ -10158,6 +10205,7 @@ export namespace Prisma {
     country: string
     role?: $Enums.Role
     balance?: number
+    outstandingDebt?: number
     createdAt?: Date | string
     updatedAt?: Date | string
     isVerified?: boolean
@@ -10171,6 +10219,7 @@ export namespace Prisma {
     country?: StringFieldUpdateOperationsInput | string
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
     balance?: FloatFieldUpdateOperationsInput | number
+    outstandingDebt?: FloatFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     isVerified?: BoolFieldUpdateOperationsInput | boolean
@@ -10184,6 +10233,7 @@ export namespace Prisma {
     country?: StringFieldUpdateOperationsInput | string
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
     balance?: FloatFieldUpdateOperationsInput | number
+    outstandingDebt?: FloatFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     isVerified?: BoolFieldUpdateOperationsInput | boolean
@@ -10533,6 +10583,7 @@ export namespace Prisma {
     amount: number
     description: string
     type: string
+    relatedOrderId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -10542,6 +10593,7 @@ export namespace Prisma {
     amount: number
     description: string
     type: string
+    relatedOrderId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -10551,6 +10603,7 @@ export namespace Prisma {
     amount?: FloatFieldUpdateOperationsInput | number
     description?: StringFieldUpdateOperationsInput | string
     type?: StringFieldUpdateOperationsInput | string
+    relatedOrderId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -10560,6 +10613,7 @@ export namespace Prisma {
     amount?: FloatFieldUpdateOperationsInput | number
     description?: StringFieldUpdateOperationsInput | string
     type?: StringFieldUpdateOperationsInput | string
+    relatedOrderId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -10569,6 +10623,7 @@ export namespace Prisma {
     amount: number
     description: string
     type: string
+    relatedOrderId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -10578,6 +10633,7 @@ export namespace Prisma {
     amount?: FloatFieldUpdateOperationsInput | number
     description?: StringFieldUpdateOperationsInput | string
     type?: StringFieldUpdateOperationsInput | string
+    relatedOrderId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -10587,6 +10643,7 @@ export namespace Prisma {
     amount?: FloatFieldUpdateOperationsInput | number
     description?: StringFieldUpdateOperationsInput | string
     type?: StringFieldUpdateOperationsInput | string
+    relatedOrderId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -10662,6 +10719,7 @@ export namespace Prisma {
     country?: SortOrder
     role?: SortOrder
     balance?: SortOrder
+    outstandingDebt?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     isVerified?: SortOrder
@@ -10669,6 +10727,7 @@ export namespace Prisma {
 
   export type UserAvgOrderByAggregateInput = {
     balance?: SortOrder
+    outstandingDebt?: SortOrder
   }
 
   export type UserMaxOrderByAggregateInput = {
@@ -10679,6 +10738,7 @@ export namespace Prisma {
     country?: SortOrder
     role?: SortOrder
     balance?: SortOrder
+    outstandingDebt?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     isVerified?: SortOrder
@@ -10692,6 +10752,7 @@ export namespace Prisma {
     country?: SortOrder
     role?: SortOrder
     balance?: SortOrder
+    outstandingDebt?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     isVerified?: SortOrder
@@ -10699,6 +10760,7 @@ export namespace Prisma {
 
   export type UserSumOrderByAggregateInput = {
     balance?: SortOrder
+    outstandingDebt?: SortOrder
   }
 
   export type StringWithAggregatesFilter<$PrismaModel = never> = {
@@ -11073,6 +11135,7 @@ export namespace Prisma {
     amount?: SortOrder
     description?: SortOrder
     type?: SortOrder
+    relatedOrderId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -11086,6 +11149,7 @@ export namespace Prisma {
     amount?: SortOrder
     description?: SortOrder
     type?: SortOrder
+    relatedOrderId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -11095,6 +11159,7 @@ export namespace Prisma {
     amount?: SortOrder
     description?: SortOrder
     type?: SortOrder
+    relatedOrderId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -11884,6 +11949,7 @@ export namespace Prisma {
     country: string
     role?: $Enums.Role
     balance?: number
+    outstandingDebt?: number
     createdAt?: Date | string
     updatedAt?: Date | string
     isVerified?: boolean
@@ -11898,6 +11964,7 @@ export namespace Prisma {
     country: string
     role?: $Enums.Role
     balance?: number
+    outstandingDebt?: number
     createdAt?: Date | string
     updatedAt?: Date | string
     isVerified?: boolean
@@ -11953,6 +12020,7 @@ export namespace Prisma {
     country?: StringFieldUpdateOperationsInput | string
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
     balance?: FloatFieldUpdateOperationsInput | number
+    outstandingDebt?: FloatFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     isVerified?: BoolFieldUpdateOperationsInput | boolean
@@ -11967,6 +12035,7 @@ export namespace Prisma {
     country?: StringFieldUpdateOperationsInput | string
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
     balance?: FloatFieldUpdateOperationsInput | number
+    outstandingDebt?: FloatFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     isVerified?: BoolFieldUpdateOperationsInput | boolean
@@ -12109,6 +12178,7 @@ export namespace Prisma {
     country: string
     role?: $Enums.Role
     balance?: number
+    outstandingDebt?: number
     createdAt?: Date | string
     updatedAt?: Date | string
     isVerified?: boolean
@@ -12123,6 +12193,7 @@ export namespace Prisma {
     country: string
     role?: $Enums.Role
     balance?: number
+    outstandingDebt?: number
     createdAt?: Date | string
     updatedAt?: Date | string
     isVerified?: boolean
@@ -12180,6 +12251,7 @@ export namespace Prisma {
     country?: StringFieldUpdateOperationsInput | string
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
     balance?: FloatFieldUpdateOperationsInput | number
+    outstandingDebt?: FloatFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     isVerified?: BoolFieldUpdateOperationsInput | boolean
@@ -12194,6 +12266,7 @@ export namespace Prisma {
     country?: StringFieldUpdateOperationsInput | string
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
     balance?: FloatFieldUpdateOperationsInput | number
+    outstandingDebt?: FloatFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     isVerified?: BoolFieldUpdateOperationsInput | boolean

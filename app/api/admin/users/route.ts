@@ -23,6 +23,7 @@ export async function GET(request: NextRequest) {
         country: true,
         role: true,
         balance: true,
+        outstandingDebt: true,
         createdAt: true
       },
       orderBy: {

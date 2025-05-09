@@ -17,6 +17,7 @@ interface User {
   phone: string
   country: string
   balance: number
+  outstandingDebt: number
   role: string
 }
 
@@ -25,7 +26,9 @@ export default function AdminUsersPage() {
   const [loading, setLoading] = useState(true)
   const [selectedUser, setSelectedUser] = useState<User | null>(null)
   const [amountToAdd, setAmountToAdd] = useState("")
-  const [isDialogOpen, setIsDialogOpen] = useState(false)
+  const [amountToSettle, setAmountToSettle] = useState("")
+  const [isAddBalanceDialogOpen, setIsAddBalanceDialogOpen] = useState(false)
+  const [isSettleDebtDialogOpen, setIsSettleDebtDialogOpen] = useState(false)
   const { toast } = useToast()
 
   useEffect(() => {
@@ -103,7 +106,7 @@ export default function AdminUsersPage() {
 
         // Reset and close
         setAmountToAdd("")
-        setIsDialogOpen(false)
+        setIsAddBalanceDialogOpen(false)
       } else {
         toast({
           title: "Error",
@@ -121,10 +124,77 @@ export default function AdminUsersPage() {
     }
   }
 
+  const handleSettleDebt = async () => {
+    if (!selectedUser) return
+
+    try {
+      const amount = parseFloat(amountToSettle)
+
+      if (isNaN(amount) || amount <= 0) {
+        toast({
+          title: "Invalid amount",
+          description: "Please enter a valid positive amount",
+          variant: "destructive",
+        })
+        return
+      }
+
+      const response = await fetch("/api/users/settle-debt", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          userId: selectedUser.id,
+          amount,
+        }),
+      })
+
+      const data = await response.json()
+
+      if (data.success) {
+        toast({
+          title: "Success",
+          description: data.message,
+        })
+
+        // Update user in the list
+        setUsers(users.map(user =>
+          user.id === selectedUser.id
+            ? { ...user, outstandingDebt: data.remainingDebt }
+            : user
+        ))
+
+        // Reset and close
+        setAmountToSettle("")
+        setIsSettleDebtDialogOpen(false)
+      } else {
+        toast({
+          title: "Error",
+          description: data.message || "Failed to settle debt",
+          variant: "destructive",
+        })
+      }
+    } catch (error) {
+      console.error("Error settling debt:", error)
+      toast({
+        title: "Error",
+        description: "Failed to settle debt",
+        variant: "destructive",
+      })
+    }
+  }
+
   const openAddBalanceDialog = (user: User) => {
     setSelectedUser(user)
     setAmountToAdd("")
-    setIsDialogOpen(true)
+    setIsAddBalanceDialogOpen(true)
+  }
+
+  const openSettleDebtDialog = (user: User) => {
+    setSelectedUser(user)
+    setAmountToSettle(user.outstandingDebt > 0 ? user.outstandingDebt.toString() : "")
+    setIsSettleDebtDialogOpen(true)
   }
 
   if (loading) {
@@ -148,13 +218,18 @@ export default function AdminUsersPage() {
         </TabsList>
 
         <TabsContent value="users">
-          <UserTable users={users} onAddBalance={openAddBalanceDialog} />
+          <UserTable
+            users={users}
+            onAddBalance={openAddBalanceDialog}
+            onSettleDebt={openSettleDebtDialog}
+          />
         </TabsContent>
 
         <TabsContent value="iraq">
           <UserTable
             users={users.filter(user => user.country === "Iraq")}
             onAddBalance={openAddBalanceDialog}
+            onSettleDebt={openSettleDebtDialog}
           />
         </TabsContent>
 
@@ -162,11 +237,12 @@ export default function AdminUsersPage() {
           <UserTable
             users={users.filter(user => user.country === "Syria")}
             onAddBalance={openAddBalanceDialog}
+            onSettleDebt={openSettleDebtDialog}
           />
         </TabsContent>
       </Tabs>
 
-      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+      <Dialog open={isAddBalanceDialogOpen} onOpenChange={setIsAddBalanceDialogOpen}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Add Balance for {selectedUser?.name}</DialogTitle>
@@ -200,11 +276,56 @@ export default function AdminUsersPage() {
           </div>
 
           <div className="flex justify-end gap-2">
-            <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
+            <Button variant="outline" onClick={() => setIsAddBalanceDialogOpen(false)}>
               Cancel
             </Button>
             <Button onClick={handleAddBalance}>
               Add Balance
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={isSettleDebtDialogOpen} onOpenChange={setIsSettleDebtDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Settle Debt for {selectedUser?.name}</DialogTitle>
+          </DialogHeader>
+
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="current-debt">Outstanding Debt</Label>
+              <div className="flex items-center">
+                <DollarSign className="h-4 w-4 text-muted-foreground mr-1" />
+                <span className="font-medium text-red-500">${selectedUser?.outstandingDebt.toFixed(2)}</span>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="amount-to-settle">Amount to Settle</Label>
+              <div className="relative">
+                <DollarSign className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                <Input
+                  id="amount-to-settle"
+                  placeholder="0.00"
+                  value={amountToSettle}
+                  onChange={(e) => setAmountToSettle(e.target.value)}
+                  className="pl-10"
+                  type="number"
+                  min="0"
+                  max={selectedUser?.outstandingDebt}
+                  step="0.01"
+                />
+              </div>
+            </div>
+          </div>
+
+          <div className="flex justify-end gap-2">
+            <Button variant="outline" onClick={() => setIsSettleDebtDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleSettleDebt}>
+              Settle Debt
             </Button>
           </div>
         </DialogContent>
@@ -216,9 +337,10 @@ export default function AdminUsersPage() {
 interface UserTableProps {
   users: User[]
   onAddBalance: (user: User) => void
+  onSettleDebt: (user: User) => void
 }
 
-function UserTable({ users, onAddBalance }: UserTableProps) {
+function UserTable({ users, onAddBalance, onSettleDebt }: UserTableProps) {
   return (
     <Card>
       <CardHeader>
@@ -235,6 +357,7 @@ function UserTable({ users, onAddBalance }: UserTableProps) {
                 <TableHead>Phone</TableHead>
                 <TableHead>Country</TableHead>
                 <TableHead>Balance</TableHead>
+                <TableHead>Outstanding Debt</TableHead>
                 <TableHead>Role</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
@@ -252,22 +375,35 @@ function UserTable({ users, onAddBalance }: UserTableProps) {
                   </TableCell>
                   <TableCell>${user.balance.toFixed(2)}</TableCell>
                   <TableCell>
-                    <span className={`inline-block px-2 py-1 rounded-full text-xs font-medium ${user.role === 'ADMIN'
-                        ? 'bg-blue-100 text-blue-800'
-                        : 'bg-green-100 text-green-800'
-                      }`}>
-                      {user.role}
-                    </span>
+                    {user.outstandingDebt > 0 ? (
+                      <span className="text-red-500 font-medium">${user.outstandingDebt.toFixed(2)}</span>
+                    ) : (
+                      <span className="text-green-500">$0.00</span>
+                    )}
                   </TableCell>
+                  <TableCell>{user.role}</TableCell>
                   <TableCell className="text-right">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => onAddBalance(user)}
-                    >
-                      <DollarSign className="h-4 w-4 mr-1" />
-                      Add Balance
-                    </Button>
+                    <div className="flex justify-end gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => onAddBalance(user)}
+                      >
+                        <DollarSign className="h-4 w-4 mr-1" />
+                        Add Balance
+                      </Button>
+                      {user.outstandingDebt > 0 && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => onSettleDebt(user)}
+                          className="border-red-200 hover:bg-red-100 hover:text-red-600"
+                        >
+                          <DollarSign className="h-4 w-4 mr-1" />
+                          Settle Debt
+                        </Button>
+                      )}
+                    </div>
                   </TableCell>
                 </TableRow>
               ))}
