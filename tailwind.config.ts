@@ -51,12 +51,13 @@ const config: Config = {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
-        // Food-themed custom colors
-        cherry: "#E63946",
-        cream: "#F1FAEE",
-        mint: "#A8DADC",
-        teal: "#457B9D",
-        navy: "#1D3557",
+        // Wonder-themed custom colors
+        pink: "#EA4C89",
+        pinkLight: "#F082AC",
+        pinkDark: "#D23872",
+        rose: "#FFD1DC",
+        roseLight: "#FFF0F5",
+        roseDark: "#FFB6C1",
       },
       borderRadius: {
         lg: "var(--radius)",

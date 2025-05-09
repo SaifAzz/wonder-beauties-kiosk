@@ -4,65 +4,65 @@
 
 @layer base {
   :root {
-    --background: 47 100% 97%;
-    --foreground: 222 47% 11%;
+    --background: 0 0% 100%;
+    --foreground: 335 50% 30%;
 
     --card: 0 0% 100%;
-    --card-foreground: 222 47% 11%;
+    --card-foreground: 335 50% 30%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 222 47% 11%;
+    --popover-foreground: 335 50% 30%;
 
-    --primary: 355 78% 56%;
-    --primary-foreground: 210 40% 98%;
+    --primary: 335 85% 60%;
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 197 37% 76%;
-    --secondary-foreground: 222 47% 11%;
+    --secondary: 335 30% 95%;
+    --secondary-foreground: 335 50% 30%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --muted: 335 20% 95%;
+    --muted-foreground: 335 40% 50%;
 
-    --accent: 197 37% 76%;
-    --accent-foreground: 222 47% 11%;
+    --accent: 335 40% 90%;
+    --accent-foreground: 335 50% 30%;
 
     --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222 47% 11%;
+    --border: 335 20% 90%;
+    --input: 335 20% 90%;
+    --ring: 335 85% 60%;
 
     --radius: 0.75rem;
   }
 
   .dark {
-    --background: 222 47% 11%;
-    --foreground: 210 40% 98%;
+    --background: 335 30% 10%;
+    --foreground: 0 0% 98%;
 
-    --card: 222 47% 11%;
-    --card-foreground: 210 40% 98%;
+    --card: 335 30% 10%;
+    --card-foreground: 0 0% 98%;
 
-    --popover: 222 47% 11%;
-    --popover-foreground: 210 40% 98%;
+    --popover: 335 30% 10%;
+    --popover-foreground: 0 0% 98%;
 
-    --primary: 355 78% 56%;
-    --primary-foreground: 210 40% 98%;
+    --primary: 335 85% 60%;
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
+    --secondary: 335 30% 20%;
+    --secondary-foreground: 0 0% 98%;
 
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
+    --muted: 335 25% 20%;
+    --muted-foreground: 335 15% 65%;
 
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
+    --accent: 335 30% 25%;
+    --accent-foreground: 0 0% 98%;
 
     --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive-foreground: 0 0% 98%;
 
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
+    --border: 335 30% 20%;
+    --input: 335 30% 20%;
+    --ring: 335 85% 60%;
   }
 }
 
@@ -75,7 +75,46 @@
   }
 }
 
-.food-pattern {
-  background-color: #f8f5f2;
-  background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23e63946' fill-opacity='0.1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+.beauty-pattern {
+  background-color: #fff9fb;
+  background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ea4c89' fill-opacity='0.1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+}
+
+.logo-bg-pattern {
+  background-color: #fff9fb;
+  background-image: radial-gradient(#ea4c89 8%, transparent 8%),
+    radial-gradient(#ea4c89 8%, transparent 8%);
+  background-size: 60px 60px;
+  background-position: 0 0, 30px 30px;
+  background-repeat: repeat;
+  background-blend-mode: multiply;
+  opacity: 0.05;
+}
+
+.floating-logos {
+  position: relative;
+  overflow: hidden;
+}
+
+.floating-logos::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: url("data:image/svg+xml,%3Csvg width='80' height='80' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='50' cy='50' r='40' stroke='%23EA4C89' stroke-width='3' fill='none' fill-opacity='0.1' stroke-opacity='0.1'/%3E%3Ctext x='50' y='55' font-family='Arial' font-size='10' text-anchor='middle' fill='%23EA4C89' fill-opacity='0.1'%3EWONDER%3C/text%3E%3C/svg%3E");
+  background-size: 120px 120px;
+  opacity: 0.05;
+  z-index: 0;
+  animation: float 60s linear infinite;
+}
+
+@keyframes float {
+  0% {
+    background-position: 0% 0%;
+  }
+  100% {
+    background-position: 800% 800%;
+  }
 }

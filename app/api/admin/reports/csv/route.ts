@@ -30,7 +30,8 @@ export async function GET(request: NextRequest) {
           country: true,
           balance: true,
           role: true,
-          createdAt: true
+          createdAt: true,
+          outstandingDebt: true
         },
         orderBy: {
           createdAt: 'desc'
@@ -38,11 +39,11 @@ export async function GET(request: NextRequest) {
       })
       
       // Create CSV header
-      csvData = 'ID,Name,Phone,Country,Balance,Role,Created Date\n'
+      csvData = 'ID,Name,Phone,Country,Balance,Role,Created Date,Outstanding Debt\n'
       
       // Add user data rows
       users.forEach(user => {
-        csvData += `${user.id},${user.name},${user.phone},${user.country},${user.balance.toFixed(2)},${user.role},${formatDate(user.createdAt)}\n`
+        csvData += `${user.id},${user.name},${user.phone},${user.country},${user.balance.toFixed(2)},${user.role},${formatDate(user.createdAt) },${user.outstandingDebt.toFixed(2)}\n`
       })
       
       filename = 'user-balances.csv'
@@ -77,7 +78,7 @@ export async function GET(request: NextRequest) {
       })
       
       // Create CSV header
-      csvData = 'Country,Total Sales,Orders Count,Average Order Value\n'
+      csvData = 'Country,Total Sales,Orders Count,Average Order Value,Outstanding Debt\n'
       
       // Add country data rows
       Object.entries(countryGroups).forEach(([country, data]) => {
@@ -96,7 +97,7 @@ export async function GET(request: NextRequest) {
       })
       
       // Create CSV header
-      csvData = 'ID,Name,Description,Price,Quantity,Country,Created Date\n'
+      csvData = 'ID,Name,Description,Price,Quantity,Country,Created Date,Outstanding Debt\n'
       
       // Add product data rows
       products.forEach(product => {
@@ -119,12 +120,13 @@ export async function GET(request: NextRequest) {
         }
       })
       
+
       // Create CSV header
-      csvData = 'ID,Name,Current Stock,Country,Price,Created Date\n'
+      csvData = 'ID,Name,Current Stock,Country,Price,Created Date,Outstanding Debt\n'
       
       // Add product data rows
       lowStockProducts.forEach(product => {
-        csvData += `${product.id},${product.name},${product.quantity},${product.country},${product.price.toFixed(2)},${formatDate(product.createdAt)}\n`
+        csvData += `${product.id},${product.name},${product.quantity},${product.country},${product.price.toFixed(2)},${formatDate(product.createdAt)},${product.outstandingDebt.toFixed(2)}\n`
       })
       
       filename = 'low-stock-products.csv'

@@ -55,6 +55,7 @@ interface ReportData {
     expense: number;
     balance: number;
   };
+  
 }
 
 export default function Reports() {

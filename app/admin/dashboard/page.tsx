@@ -8,9 +8,16 @@ import { ArrowRight, DollarSign, ShoppingBag, UsersIcon, TrendingUp, Package, Fi
 import { motion } from "framer-motion"
 import { useToast } from "@/components/ui/use-toast"
 
+interface User {
+  id: string
+  status: string
+  // Add other user properties as needed
+}
+
 export default function AdminDashboard() {
   const [country, setCountry] = useState("")
   const [loading, setLoading] = useState(true)
+  const [users, setUsers] = useState<User[]>([])
   const router = useRouter()
   const { toast } = useToast()
 
@@ -49,6 +56,21 @@ export default function AdminDashboard() {
     }
 
     checkAuth()
+
+    // Fetch users
+    const fetchUsers = async () => {
+      try {
+        const response = await fetch("/api/admin/users")
+        const data = await response.json()
+        if (data.success) {
+          setUsers(data.users)
+        }
+      } catch (error) {
+        console.error("Error fetching users:", error)
+      }
+    }
+
+    fetchUsers()
   }, [router, toast])
 
   if (loading) {
@@ -90,7 +112,7 @@ export default function AdminDashboard() {
         </Card>
       </motion.div>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-2">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -127,12 +149,12 @@ export default function AdminDashboard() {
                   </div>
                   <div>
                     <div className="font-medium">Add New Product</div>
-                    <div className="text-sm text-muted-foreground">Create a new product in the catalog</div>
+                    <div className="text-sm text-muted-foreground">Create product</div>
                   </div>
                 </div>
                 <ArrowRight className="h-4 w-4 text-muted-foreground" />
               </Link>
-            </CardContent>
+                          </CardContent>
           </Card>
         </motion.div>
 
@@ -177,56 +199,6 @@ export default function AdminDashboard() {
                 </div>
                 <ArrowRight className="h-4 w-4 text-muted-foreground" />
               </Link>
-            </CardContent>
-          </Card>
-        </motion.div>
-
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.3 }}
-          className="md:col-span-2 lg:col-span-1"
-        >
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-lg">Quick Stats</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-full bg-navy/10 flex items-center justify-center">
-                    <TrendingUp className="h-4 w-4 text-navy" />
-                  </div>
-                  <div>
-                    <div className="font-medium">Total Sales Today</div>
-                  </div>
-                </div>
-                <div className="font-bold">$22.25</div>
-              </div>
-
-              <div className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-full bg-navy/10 flex items-center justify-center">
-                    <UsersIcon className="h-4 w-4 text-navy" />
-                  </div>
-                  <div>
-                    <div className="font-medium">Active Users</div>
-                  </div>
-                </div>
-                <div className="font-bold">6</div>
-              </div>
-
-              <div className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-full bg-navy/10 flex items-center justify-center">
-                    <Package className="h-4 w-4 text-navy" />
-                  </div>
-                  <div>
-                    <div className="font-medium">Low Stock Items</div>
-                  </div>
-                </div>
-                <div className="font-bold">3</div>
-              </div>
             </CardContent>
           </Card>
         </motion.div>

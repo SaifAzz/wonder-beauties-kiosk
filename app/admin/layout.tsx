@@ -105,20 +105,25 @@ export default function AdminLayout({
                 href={item.href}
                 className={cn(
                   "flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium",
-                  pathname === item.href ? "bg-cherry text-white" : "text-muted-foreground hover:bg-muted",
+                  pathname === item.href
+                    ? "bg-pink text-white"
+                    : "text-gray-500 hover:bg-muted hover:text-gray-700",
                 )}
                 onClick={() => setMobileMenuOpen(false)}
               >
-                <item.icon className="h-5 w-5" />
+                <item.icon className={cn(
+                  "h-5 w-5",
+                  pathname === item.href ? "" : "text-gray-400"
+                )} />
                 {item.name}
               </Link>
             ))}
             <Button
               variant="ghost"
-              className="w-full justify-start text-muted-foreground hover:bg-muted"
+              className="w-full justify-start text-gray-500 hover:bg-muted hover:text-gray-700"
               onClick={handleLogout}
             >
-              <LogOut className="h-5 w-5 mr-3" />
+              <LogOut className="h-5 w-5 mr-3 text-gray-400" />
               Logout
             </Button>
           </div>
@@ -140,10 +145,15 @@ export default function AdminLayout({
                   href={item.href}
                   className={cn(
                     "flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium",
-                    pathname === item.href ? "bg-cherry text-white" : "text-muted-foreground hover:bg-muted",
+                    pathname === item.href
+                      ? "bg-pink text-white"
+                      : "text-gray-500 hover:bg-muted hover:text-gray-700",
                   )}
                 >
-                  <item.icon className="h-5 w-5" />
+                  <item.icon className={cn(
+                    "h-5 w-5",
+                    pathname === item.href ? "" : "text-gray-400"
+                  )} />
                   {item.name}
                 </Link>
               ))}
@@ -152,10 +162,10 @@ export default function AdminLayout({
             <div className="p-4 border-t">
               <Button
                 variant="ghost"
-                className="w-full justify-start text-muted-foreground hover:bg-muted"
+                className="w-full justify-start text-gray-500 hover:bg-muted hover:text-gray-700"
                 onClick={handleLogout}
               >
-                <LogOut className="h-5 w-5 mr-3" />
+                <LogOut className="h-5 w-5 mr-3 text-gray-400" />
                 Logout
               </Button>
             </div>
