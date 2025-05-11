@@ -2,15 +2,15 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { getCurrentUser } from '@/lib/session'
 
-// POST - Settle user debt (admin only)
+// POST - تسوية ديون المستخدم (للمسؤول فقط)
 export async function POST(request: NextRequest) {
   try {
-    // Verify user is admin
+    // التحقق من أن المستخدم مسؤول
     const currentUser = await getCurrentUser()
     
     if (!currentUser || currentUser.role !== 'ADMIN') {
       return NextResponse.json(
-        { success: false, message: 'Unauthorized' },
+        { success: false, message: 'غير مصرح به' },
         { status: 401 }
       )
     }
@@ -20,53 +20,53 @@ export async function POST(request: NextRequest) {
     
     if (!userId || !amount || amount <= 0) {
       return NextResponse.json(
-        { success: false, message: 'User ID and positive amount are required' },
+        { success: false, message: 'معرف المستخدم والمبلغ الموجب مطلوبان' },
         { status: 400 }
       )
     }
     
-    // Verify target user exists
+    // التحقق من وجود المستخدم المستهدف
     const targetUser = await prisma.user.findUnique({
       where: { id: userId }
     })
     
     if (!targetUser) {
       return NextResponse.json(
-        { success: false, message: 'User not found' },
+        { success: false, message: 'المستخدم غير موجود' },
         { status: 404 }
       )
     }
     
-    // Check if the user has outstanding debt
+    // التحقق مما إذا كان المستخدم لديه ديون مستحقة
     if (targetUser.outstandingDebt <= 0) {
       return NextResponse.json(
-        { success: false, message: 'User has no outstanding debt to settle' },
+        { success: false, message: 'المستخدم ليس لديه ديون مستحقة للتسوية' },
         { status: 400 }
       )
     }
     
-    // Calculate the amount to settle (can't settle more than the outstanding debt)
+    // حساب المبلغ المراد تسويته (لا يمكن تسوية أكثر من الدين المستحق)
     const amountToSettle = Math.min(targetUser.outstandingDebt, parseFloat(amount.toString()))
     const newOutstandingDebt = targetUser.outstandingDebt - amountToSettle
     
-    // Start a transaction
+    // بدء معاملة
     await prisma.$transaction(async (prisma) => {
-      // 1. Reduce user's outstanding debt
+      // 1. تقليل الدين المستحق للمستخدم
       await prisma.user.update({
         where: { id: userId },
         data: { outstandingDebt: newOutstandingDebt }
       })
       
-      // 2. Record a petty cash entry for the settled debt
+      // 2. تسجيل إدخال نقدي للدين المسدد
       await prisma.pettyCash.create({
         data: {
           amount: amountToSettle,
-          description: `Debt settlement from ${targetUser.name}`,
+          description: `تسوية دين من ${targetUser.name}`,
           type: 'INCOME'
         }
       })
       
-      // 3. Update any PENDING_PAYMENT orders to COMPLETED if debt is fully settled
+      // 3. تحديث أي طلبات في حالة PENDING_PAYMENT إلى COMPLETED إذا تمت تسوية الدين بالكامل
       if (newOutstandingDebt === 0) {
         await prisma.order.updateMany({
           where: { 
@@ -82,12 +82,12 @@ export async function POST(request: NextRequest) {
       success: true,
       amountSettled: amountToSettle,
       remainingDebt: newOutstandingDebt,
-      message: `Successfully settled $${amountToSettle.toFixed(2)} of ${targetUser.name}'s debt. Remaining debt: $${newOutstandingDebt.toFixed(2)}`
+      message: `تمت تسوية ${amountToSettle.toFixed(2)} ريال من ديون ${targetUser.name} بنجاح. الدين المتبقي: ${newOutstandingDebt.toFixed(2)} ريال`
     })
   } catch (error) {
-    console.error('Error settling debt:', error)
+    console.error('خطأ في تسوية الدين:', error)
     return NextResponse.json(
-      { success: false, message: 'Failed to settle debt' },
+      { success: false, message: 'فشل في تسوية الدين' },
       { status: 500 }
     )
   }

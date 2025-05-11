@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { ArrowRight, DollarSign, ShoppingBag, UsersIcon, TrendingUp, Package, FileText } from "lucide-react"
+import { ArrowRight, DollarSign, ShoppingBag, UsersIcon, TrendingUp, Package, FileText, History, PlusCircle, MinusCircle } from "lucide-react"
 import { motion } from "framer-motion"
 import { useToast } from "@/components/ui/use-toast"
 
@@ -161,6 +161,87 @@ export default function AdminDashboard() {
                   </span>
                 )}
               </div>
+            )}
+          </CardContent>
+        </Card>
+      </motion.div>
+
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.2 }}
+      >
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-xl">إدارة النقد</CardTitle>
+            <CardDescription>ملخص حركات النقد والمصروفات</CardDescription>
+          </CardHeader>
+          <CardContent>
+            {financialLoading ? (
+              <div className="flex items-center gap-2">
+                <div className="animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-primary"></div>
+                <span className="text-muted-foreground">جاري التحميل...</span>
+              </div>
+            ) : (
+              <>
+                <div className="grid grid-cols-2 gap-4 mb-4">
+                  <div className="flex flex-col">
+                    <div className="text-sm text-muted-foreground">الإيرادات</div>
+                    <div className="flex items-center mt-1">
+                      <PlusCircle className="h-4 w-4 mr-2 text-green-600" />
+                      <span className="text-xl font-bold text-green-600">
+                        ${financialData ? financialData.transactions
+                          .filter(t => t.type === "INCOME")
+                          .reduce((sum, t) => sum + t.amount, 0).toFixed(2) : '0.00'}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="flex flex-col">
+                    <div className="text-sm text-muted-foreground">المصروفات</div>
+                    <div className="flex items-center mt-1">
+                      <MinusCircle className="h-4 w-4 mr-2 text-red-600" />
+                      <span className="text-xl font-bold text-red-600">
+                        ${financialData ? financialData.transactions
+                          .filter(t => t.type === "EXPENSE")
+                          .reduce((sum, t) => sum + t.amount, 0).toFixed(2) : '0.00'}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Link
+                    href="/admin/petty-cash"
+                    className="flex items-center justify-between p-2 rounded-lg bg-muted/50 hover:bg-muted transition-colors"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center">
+                        <DollarSign className="h-4 w-4 text-blue-600" />
+                      </div>
+                      <div>
+                        <div className="font-medium">إدارة النقد</div>
+                        <div className="text-sm text-muted-foreground">إضافة وعرض معاملات النقد</div>
+                      </div>
+                    </div>
+                    <ArrowRight className="h-4 w-4 text-muted-foreground" />
+                  </Link>
+
+                  <Link
+                    href="/admin/petty-cash/history"
+                    className="flex items-center justify-between p-2 rounded-lg bg-muted/50 hover:bg-muted transition-colors"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-full bg-amber-100 flex items-center justify-center">
+                        <History className="h-4 w-4 text-amber-600" />
+                      </div>
+                      <div>
+                        <div className="font-medium">سجل المعاملات</div>
+                        <div className="text-sm text-muted-foreground">عرض تاريخ وتفاصيل المعاملات</div>
+                      </div>
+                    </div>
+                    <ArrowRight className="h-4 w-4 text-muted-foreground" />
+                  </Link>
+                </div>
+              </>
             )}
           </CardContent>
         </Card>

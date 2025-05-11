@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label"
 import { useToast } from "@/components/ui/use-toast"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { PlusCircle, MinusCircle, DollarSign } from "lucide-react"
+import { PlusCircle, MinusCircle, DollarSign, History } from "lucide-react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { format } from "date-fns"
 
@@ -43,16 +43,16 @@ export default function PettyCashPage() {
                     }
                 } else {
                     toast({
-                        title: "Error",
-                        description: "Failed to load transactions. Please try again.",
+                        title: "خطأ",
+                        description: "فشل في تحميل المعاملات. يرجى المحاولة مرة أخرى.",
                         variant: "destructive",
                     })
                 }
             } catch (error) {
-                console.error("Error fetching transactions:", error)
+                console.error("خطأ في جلب المعاملات:", error)
                 toast({
-                    title: "Error",
-                    description: "Failed to load transactions. Please try again.",
+                    title: "خطأ",
+                    description: "فشل في تحميل المعاملات. يرجى المحاولة مرة أخرى.",
                     variant: "destructive",
                 })
             } finally {
@@ -69,8 +69,8 @@ export default function PettyCashPage() {
 
             if (isNaN(amountValue) || amountValue <= 0) {
                 toast({
-                    title: "Invalid amount",
-                    description: "Please enter a valid positive amount",
+                    title: "قيمة غير صالحة",
+                    description: "يرجى إدخال قيمة موجبة صالحة",
                     variant: "destructive",
                 })
                 return
@@ -78,8 +78,8 @@ export default function PettyCashPage() {
 
             if (!description.trim()) {
                 toast({
-                    title: "Missing description",
-                    description: "Please enter a description",
+                    title: "الوصف مفقود",
+                    description: "يرجى إدخال وصف",
                     variant: "destructive",
                 })
                 return
@@ -101,31 +101,31 @@ export default function PettyCashPage() {
 
             if (data.success) {
                 toast({
-                    title: "Success",
-                    description: "Transaction added successfully",
+                    title: "نجاح",
+                    description: "تمت إضافة المعاملة بنجاح",
                 })
 
-                // Add to the list and update total
+                // إضافة إلى القائمة وتحديث المجموع
                 setTransactions([data.transaction, ...transactions])
                 setTotal(type === "INCOME" ? total + amountValue : total - amountValue)
 
-                // Reset and close
+                // إعادة تعيين وإغلاق
                 setAmount("")
                 setDescription("")
                 setType("INCOME")
                 setIsAddDialogOpen(false)
             } else {
                 toast({
-                    title: "Error",
-                    description: data.message || "Failed to add transaction",
+                    title: "خطأ",
+                    description: data.message || "فشل في إضافة المعاملة",
                     variant: "destructive",
                 })
             }
         } catch (error) {
-            console.error("Error adding transaction:", error)
+            console.error("خطأ في إضافة المعاملة:", error)
             toast({
-                title: "Error",
-                description: "Failed to add transaction",
+                title: "خطأ",
+                description: "فشل في إضافة المعاملة",
                 variant: "destructive",
             })
         }
@@ -140,8 +140,8 @@ export default function PettyCashPage() {
     if (loading) {
         return (
             <div className="container py-10">
-                <h1 className="text-3xl font-bold mb-8">Petty Cash Management</h1>
-                <p>Loading transactions...</p>
+                <h1 className="text-3xl font-bold mb-8">إدارة النقد</h1>
+                <p>جاري تحميل المعاملات...</p>
             </div>
         )
     }
@@ -149,31 +149,36 @@ export default function PettyCashPage() {
     return (
         <div className="container py-10">
             <div className="flex justify-between items-center mb-8">
-                <h1 className="text-3xl font-bold">Petty Cash Management</h1>
-                <Button onClick={() => setIsAddDialogOpen(true)}>
-                    <PlusCircle className="mr-2 h-4 w-4" />
-                    Add Transaction
-                </Button>
+                <h1 className="text-3xl font-bold">إدارة النقد</h1>
+                <div className="flex gap-2">
+                    <Button variant="outline" onClick={() => window.location.href = "/admin/petty-cash/history"}>
+                        <History className="mr-2 h-4 w-4" />
+                        سجل المعاملات
+                    </Button>
+                    <Button onClick={() => setIsAddDialogOpen(true)}>
+                        <PlusCircle className="mr-2 h-4 w-4" />
+                        إضافة معاملة
+                    </Button>
+                </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                 <Card>
                     <CardHeader>
-                        <CardTitle>Total Balance</CardTitle>
+                        <CardTitle>الرصيد الإجمالي</CardTitle>
                     </CardHeader>
                     <CardContent>
                         <div className="flex items-center">
-                            <DollarSign className="h-5 w-5 mr-2 text-muted-foreground" />
                             <span className={`text-2xl font-bold ${total >= 0 ? "text-green-600" : "text-red-600"}`}>
-                                {Math.abs(total).toFixed(2)}
+                                {total >= 0 ? '+' : '-'}{Math.abs(total).toFixed(2)}
                             </span>
                             {total >= 0 ? (
-                                <span className="bg-green-100 text-green-800 text-xs rounded-full px-2 py-1 ml-2">
-                                    Positive
+                                <span className="bg-green-100 text-green-800 text-xs rounded-full px-2 py-1 mr-2">
+                                    إيجابي
                                 </span>
                             ) : (
-                                <span className="bg-red-100 text-red-800 text-xs rounded-full px-2 py-1 ml-2">
-                                    Negative
+                                <span className="bg-red-100 text-red-800 text-xs rounded-full px-2 py-1 mr-2">
+                                    سلبي
                                 </span>
                             )}
                         </div>
@@ -183,19 +188,19 @@ export default function PettyCashPage() {
 
             <Card>
                 <CardHeader>
-                    <CardTitle>Transaction History</CardTitle>
+                    <CardTitle>سجل المعاملات</CardTitle>
                 </CardHeader>
                 <CardContent>
                     {transactions.length === 0 ? (
-                        <p className="text-center py-4 text-muted-foreground">No transactions found</p>
+                        <p className="text-center py-4 text-muted-foreground">لم يتم العثور على معاملات</p>
                     ) : (
                         <Table>
                             <TableHeader>
                                 <TableRow>
-                                    <TableHead>Date</TableHead>
-                                    <TableHead>Description</TableHead>
-                                    <TableHead>Type</TableHead>
-                                    <TableHead className="text-right">Amount</TableHead>
+                                    <TableHead>التاريخ</TableHead>
+                                    <TableHead>الوصف</TableHead>
+                                    <TableHead>النوع</TableHead>
+                                    <TableHead className="text-right">المبلغ</TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
@@ -208,13 +213,13 @@ export default function PettyCashPage() {
                                         <TableCell>
                                             {transaction.type === "INCOME" ? (
                                                 <div className="flex items-center">
-                                                    <PlusCircle className="h-4 w-4 text-green-600 mr-2" />
-                                                    <span className="text-green-600">Income</span>
+                                                    <PlusCircle className="h-4 w-4 text-green-600 ml-2" />
+                                                    <span className="text-green-600">دخل</span>
                                                 </div>
                                             ) : (
                                                 <div className="flex items-center">
-                                                    <MinusCircle className="h-4 w-4 text-red-600 mr-2" />
-                                                    <span className="text-red-600">Expense</span>
+                                                    <MinusCircle className="h-4 w-4 text-red-600 ml-2" />
+                                                    <span className="text-red-600">مصروف</span>
                                                 </div>
                                             )}
                                         </TableCell>
@@ -234,25 +239,25 @@ export default function PettyCashPage() {
             <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
                 <DialogContent>
                     <DialogHeader>
-                        <DialogTitle>Add New Transaction</DialogTitle>
+                        <DialogTitle>إضافة معاملة جديدة</DialogTitle>
                     </DialogHeader>
 
                     <div className="space-y-4 py-4">
                         <div className="space-y-2">
-                            <Label htmlFor="type">Transaction Type</Label>
+                            <Label htmlFor="type">نوع المعاملة</Label>
                             <Select value={type} onValueChange={setType}>
                                 <SelectTrigger>
-                                    <SelectValue placeholder="Select type" />
+                                    <SelectValue placeholder="اختر النوع" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="INCOME">Income</SelectItem>
-                                    <SelectItem value="EXPENSE">Expense</SelectItem>
+                                    <SelectItem value="INCOME">دخل</SelectItem>
+                                    <SelectItem value="EXPENSE">مصروف</SelectItem>
                                 </SelectContent>
                             </Select>
                         </div>
 
                         <div className="space-y-2">
-                            <Label htmlFor="amount">Amount</Label>
+                            <Label htmlFor="amount">المبلغ</Label>
                             <div className="relative">
                                 <DollarSign className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                                 <Input
@@ -269,10 +274,10 @@ export default function PettyCashPage() {
                         </div>
 
                         <div className="space-y-2">
-                            <Label htmlFor="description">Description</Label>
+                            <Label htmlFor="description">الوصف</Label>
                             <Input
                                 id="description"
-                                placeholder="Enter transaction description"
+                                placeholder="أدخل وصف المعاملة"
                                 value={description}
                                 onChange={(e) => setDescription(e.target.value)}
                             />
@@ -284,14 +289,14 @@ export default function PettyCashPage() {
                             resetForm()
                             setIsAddDialogOpen(false)
                         }}>
-                            Cancel
+                            إلغاء
                         </Button>
                         <Button onClick={handleAddTransaction}>
-                            Add Transaction
+                            إضافة معاملة
                         </Button>
                     </div>
                 </DialogContent>
             </Dialog>
         </div>
     )
-} 
+}

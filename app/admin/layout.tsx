@@ -7,7 +7,7 @@ import { useRouter, usePathname } from "next/navigation"
 import Link from "next/link"
 import { Logo } from "@/components/logo"
 import { Button } from "@/components/ui/button"
-import { LayoutDashboard, Package, FileText, Users, LogOut, Menu, X } from "lucide-react"
+import { LayoutDashboard, Package, FileText, Users, LogOut, Menu, X, DollarSign } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useToast } from "@/components/ui/use-toast"
 
@@ -80,6 +80,7 @@ export default function AdminLayout({
   const navigation = [
     { name: "لوحة التحكم", href: "/admin/dashboard", icon: LayoutDashboard },
     { name: "المنتجات", href: "/admin/products", icon: Package },
+    { name: "إدارة النقد", href: "/admin/petty-cash", icon: DollarSign },
     { name: "التقارير", href: "/admin/reports", icon: FileText },
     { name: "المستخدمين", href: "/admin/users", icon: Users },
   ]

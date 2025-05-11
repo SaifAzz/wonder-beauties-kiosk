@@ -2,20 +2,20 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { getCurrentUser } from '@/lib/session'
 
-// GET - List orders
+// GET - قائمة الطلبات
 export async function GET(request: NextRequest) {
   try {
-    // Verify user is authenticated
+    // التحقق من أن المستخدم مسجل الدخول
     const user = await getCurrentUser()
     
     if (!user) {
       return NextResponse.json(
-        { success: false, message: 'Unauthorized' },
+        { success: false, message: 'غير مصرح به' },
         { status: 401 }
       )
     }
     
-    // Admin can see all orders, regular users only see their own
+    // المسؤول يمكنه رؤية جميع الطلبات، المستخدمون العاديون يرون طلباتهم فقط
     const query: any = {}
     
     if (user.role !== 'ADMIN') {
@@ -49,28 +49,28 @@ export async function GET(request: NextRequest) {
       orders
     })
   } catch (error) {
-    console.error('Error fetching orders:', error)
+    console.error('خطأ في جلب الطلبات:', error)
     return NextResponse.json(
-      { success: false, message: 'Failed to fetch orders' },
+      { success: false, message: 'فشل في جلب الطلبات' },
       { status: 500 }
     )
   }
 }
 
-// POST - Create a new order from cart
+// POST - إنشاء طلب جديد من سلة التسوق
 export async function POST(request: NextRequest) {
   try {
-    // Verify user is authenticated
+    // التحقق من أن المستخدم مسجل الدخول
     const user = await getCurrentUser()
     
     if (!user) {
       return NextResponse.json(
-        { success: false, message: 'Unauthorized' },
+        { success: false, message: 'غير مصرح به' },
         { status: 401 }
       )
     }
     
-    // Get user's cart
+    // الحصول على سلة المستخدم
     const cart = await prisma.cart.findUnique({
       where: { userId: user.id },
       include: {
@@ -84,12 +84,12 @@ export async function POST(request: NextRequest) {
     
     if (!cart || cart.items.length === 0) {
       return NextResponse.json(
-        { success: false, message: 'Cart is empty' },
+        { success: false, message: 'سلة التسوق فارغة' },
         { status: 400 }
       )
     }
     
-    // Check stock for each product and calculate total
+    // التحقق من المخزون لكل منتج وحساب المجموع
     let total = 0
     const itemsToCreate: { productId: any; quantity: any; price: any }[] = []
     const productsToUpdate: { id: any; newQuantity: number }[] = []
@@ -99,39 +99,39 @@ export async function POST(request: NextRequest) {
         return NextResponse.json(
           { 
             success: false, 
-            message: `Not enough stock for ${item.product.name}. Only ${item.product.quantity} available.` 
+            message: `لا يوجد مخزون كافٍ لـ ${item.product.name}. متوفر فقط ${item.product.quantity}.` 
           },
           { status: 400 }
         )
       }
       
-      // Calculate subtotal
+      // حساب المجموع الفرعي
       const itemTotal = item.quantity * item.product.price
       total += itemTotal
       
-      // Prepare order item
+      // تجهيز عنصر الطلب
       itemsToCreate.push({
         productId: item.productId,
         quantity: item.quantity,
         price: item.product.price
       })
       
-      // Prepare product update (reduce stock)
+      // تجهيز تحديث المنتج (تقليل المخزون)
       productsToUpdate.push({
         id: item.productId,
         newQuantity: item.product.quantity - item.quantity
       })
     }
     
-    // Calculate how much to change balance
+    // حساب المبلغ المخصوم من الرصيد
     const balanceDeduction = user.balance >= total ? total : user.balance
     const remainingDebt = total - balanceDeduction
     const newBalance = user.balance - balanceDeduction
     const hasPendingDebt = remainingDebt > 0
     
-    // Start a transaction
+    // بدء المعاملة
     const order = await prisma.$transaction(async (prisma) => {
-      // 1. Create the order with pending payment status if there's debt
+      // 1. إنشاء الطلب مع حالة انتظار الدفع إذا كان هناك دين
       const newOrder = await prisma.order.create({
         data: {
           userId: user.id,
@@ -150,7 +150,7 @@ export async function POST(request: NextRequest) {
         }
       })
       
-      // 2. Reduce product quantities
+      // 2. تقليل كميات المنتجات
       for (const product of productsToUpdate) {
         await prisma.product.update({
           where: { id: product.id },
@@ -158,7 +158,7 @@ export async function POST(request: NextRequest) {
         })
       }
       
-      // 3. Update user balance and debt
+      // 3. تحديث رصيد المستخدم والدين
       await prisma.user.update({
         where: { id: user.id },
         data: { 
@@ -167,31 +167,31 @@ export async function POST(request: NextRequest) {
         }
       })
       
-      // 4. Record petty cash entries
-      // Record actual payment if any balance was used
+      // 4. تسجيل إدخالات النقد
+      // تسجيل الدفع الفعلي إذا تم استخدام أي رصيد
       if (balanceDeduction > 0) {
         await prisma.pettyCash.create({
           data: {
             amount: balanceDeduction,
-            description: `Partial payment for Order ${newOrder.id} by ${user.name}`,
+            description: `دفعة جزئية للطلب ${newOrder.id} من قبل ${user.name}`,
             type: 'INCOME'
           }
         })
       }
       
-      // Record pending payment as a separate transaction if there's debt
+      // تسجيل الدفع المعلق كمعاملة منفصلة إذا كان هناك دين
       if (remainingDebt > 0) {
         await prisma.pettyCash.create({
           data: {
             amount: remainingDebt,
-            description: `Pending payment for Order ${newOrder.id} by ${user.name}`,
+            description: `دفعة معلقة للطلب ${newOrder.id} من قبل ${user.name}`,
             type: 'PENDING_INCOME',
             relatedOrderId: newOrder.id
           }
         })
       }
       
-      // 5. Clear the cart
+      // 5. تفريغ سلة التسوق
       await prisma.cart.update({
         where: { id: cart.id },
         data: {
@@ -210,13 +210,13 @@ export async function POST(request: NextRequest) {
       hasPendingDebt,
       remainingDebt,
       message: hasPendingDebt 
-        ? `Order placed successfully. You have a pending payment of $${remainingDebt.toFixed(2)}.`
-        : 'Order placed successfully'
+        ? `تم تقديم الطلب بنجاح. لديك دفعة معلقة بقيمة $${remainingDebt.toFixed(2)}.`
+        : 'تم تقديم الطلب بنجاح'
     })
   } catch (error) {
-    console.error('Error creating order:', error)
+    console.error('خطأ في إنشاء الطلب:', error)
     return NextResponse.json(
-      { success: false, message: 'Failed to create order' },
+      { success: false, message: 'فشل في إنشاء الطلب' },
       { status: 500 }
     )
   }
