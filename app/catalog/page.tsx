@@ -57,8 +57,8 @@ export default function CatalogPage() {
       } catch (error) {
         console.error("Error fetching data:", error)
         toast({
-          title: "Error",
-          description: "Failed to load products. Please try again.",
+          title: "خطأ",
+          description: "فشل في تحميل المنتجات. يرجى المحاولة مرة أخرى.",
           variant: "destructive",
         })
       } finally {
@@ -109,11 +109,11 @@ export default function CatalogPage() {
       if (data.success) {
         // Show success with yummy choice smile
         toast({
-          title: "Yummy Choice! 😋",
-          description: "Product added to your cart",
+          title: "اختيار شهي! 😋",
+          description: "تمت إضافة المنتج إلى سلة التسوق",
           action: (
             <Button size="sm" onClick={() => router.push("/cart")}>
-              View Cart
+              عرض السلة
             </Button>
           ),
         })
@@ -124,8 +124,8 @@ export default function CatalogPage() {
         }, 1000)
       } else {
         toast({
-          title: "Error",
-          description: data.message || "Could not add to cart",
+          title: "خطأ",
+          description: data.message || "لا يمكن الإضافة إلى السلة",
           variant: "destructive",
         })
         setAnimatingProductId(null)
@@ -133,8 +133,8 @@ export default function CatalogPage() {
     } catch (error) {
       console.error("Error adding to cart:", error)
       toast({
-        title: "Error",
-        description: "Failed to add product to cart",
+        title: "خطأ",
+        description: "فشل في إضافة المنتج إلى السلة",
         variant: "destructive",
       })
       setAnimatingProductId(null)
@@ -145,7 +145,7 @@ export default function CatalogPage() {
     return (
       <div className="container py-10">
         <div className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-bold">Products</h1>
+          <h1 className="text-3xl font-bold">المنتجات</h1>
           <Skeleton className="h-10 w-32" />
         </div>
 
@@ -179,20 +179,20 @@ export default function CatalogPage() {
   return (
     <div className="container py-10">
       <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold">Products</h1>
+        <h1 className="text-3xl font-bold">المنتجات</h1>
         <Button asChild>
           <Link href="/cart">
             <ShoppingCart className="mr-2 h-4 w-4" />
-            View Cart
+            عرض السلة
           </Link>
         </Button>
       </div>
 
       <div className="mb-6">
-        <Label htmlFor="search" className="sr-only">Search</Label>
+        <Label htmlFor="search" className="sr-only">بحث</Label>
         <Input
           id="search"
-          placeholder="Search products..."
+          placeholder="البحث عن المنتجات..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           className="max-w-md"
@@ -201,9 +201,9 @@ export default function CatalogPage() {
 
       {filteredProducts.length === 0 ? (
         <div className="text-center py-12">
-          <h2 className="text-2xl font-semibold mb-2">No products found</h2>
+          <h2 className="text-2xl font-semibold mb-2">لم يتم العثور على منتجات</h2>
           <p className="text-muted-foreground">
-            Try adjusting your search or check back later for new products.
+            حاول تعديل البحث أو تحقق لاحقًا من المنتجات الجديدة.
           </p>
         </div>
       ) : (
@@ -247,16 +247,16 @@ export default function CatalogPage() {
                   )}
                   <div className="flex items-center mb-2">
                     <DollarSign className="h-4 w-4 text-muted-foreground mr-1" />
-                    <span className="font-semibold">${product.price.toFixed(2)}</span>
+                    <span className="font-semibold">{product.price.toFixed(2)}</span>
                   </div>
                   {product.description && (
                     <p className="text-sm text-muted-foreground">{product.description}</p>
                   )}
                   <p className="text-sm mt-2">
                     {product.quantity > 0 ? (
-                      `${product.quantity} in stock`
+                      `${product.quantity} متوفر في المخزون`
                     ) : (
-                      <span className="text-destructive">Out of stock</span>
+                      <span className="text-destructive">غير متوفر في المخزون</span>
                     )}
                   </p>
                 </CardContent>
@@ -267,7 +267,7 @@ export default function CatalogPage() {
                     disabled={product.quantity <= 0}
                   >
                     <SmilePlus className="mr-2 h-4 w-4" />
-                    Add to Cart
+                    إضافة إلى السلة
 
                     {animatingProductId === product.id && (
                       <motion.div

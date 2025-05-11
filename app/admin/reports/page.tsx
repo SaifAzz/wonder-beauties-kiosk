@@ -265,7 +265,7 @@ export default function Reports() {
             <div className="flex items-center">
               <DollarSign className="h-5 w-5 mr-2 text-muted-foreground" />
               <div className="text-2xl font-bold">
-                ${data.sales?.total.toFixed(2) || (data.salesByCountry?.reduce((sum, country) => sum + country.sales, 0) || 0).toFixed(2)}
+                {data.sales?.total.toFixed(2) || (data.salesByCountry?.reduce((sum, country) => sum + country.sales, 0) || 0).toFixed(2)}
               </div>
             </div>
           </CardContent>

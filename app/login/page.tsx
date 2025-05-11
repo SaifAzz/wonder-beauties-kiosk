@@ -24,8 +24,8 @@ export default function LoginPage() {
 
     if (!phone || !password) {
       toast({
-        title: "Error",
-        description: "Please enter both phone number and password",
+        title: "خطأ",
+        description: "يرجى إدخال رقم الهاتف وكلمة المرور",
         variant: "destructive",
       })
       return
@@ -49,16 +49,16 @@ export default function LoginPage() {
 
       if (!data.success) {
         toast({
-          title: "Login Failed",
-          description: data.message || "Invalid credentials. Please try again.",
+          title: "فشل تسجيل الدخول",
+          description: data.message || "بيانات الاعتماد غير صالحة. يرجى المحاولة مرة أخرى.",
           variant: "destructive",
         })
         return
       }
 
       toast({
-        title: "Login Successful",
-        description: "Welcome back!",
+        title: "تم تسجيل الدخول بنجاح",
+        description: "مرحبًا بعودتك!",
       })
 
       // Redirect based on user role
@@ -70,8 +70,8 @@ export default function LoginPage() {
     } catch (error) {
       console.error("Login error:", error)
       toast({
-        title: "Error",
-        description: "An error occurred during login. Please try again later.",
+        title: "خطأ",
+        description: "حدث خطأ أثناء تسجيل الدخول. يرجى المحاولة مرة أخرى لاحقًا.",
         variant: "destructive",
       })
     } finally {
@@ -89,7 +89,7 @@ export default function LoginPage() {
               <div className="rounded-full bg-secondary p-3 overflow-hidden flex items-center justify-center w-52 h-52 shadow-lg">
                 <Image
                   src="/wonder2.avif"
-                  alt="Wonder Beauties Logo"
+                  alt="شعار وندر بيوتيز"
                   width={180}
                   height={180}
                   className="object-contain"
@@ -99,51 +99,51 @@ export default function LoginPage() {
               </div>
             </div>
             <CardHeader>
-              <CardTitle className="text-2xl font-bold text-center text-pink">Login to Your Account</CardTitle>
+              <CardTitle className="text-2xl font-bold text-center text-pink">تسجيل الدخول إلى حسابك</CardTitle>
             </CardHeader>
             <CardContent>
               <form onSubmit={handleSubmit}>
                 <div className="grid gap-4">
                   <div className="grid gap-2">
-                    <Label htmlFor="phone" className="text-foreground">Phone Number</Label>
+                    <Label htmlFor="phone" className="text-foreground">رقم الهاتف</Label>
                     <div className="relative">
-                      <Phone className="absolute left-3 top-3 h-4 w-4 text-pink" />
+                      <Phone className="absolute right-3 top-3 h-4 w-4 text-pink" />
                       <Input
                         id="phone"
-                        placeholder="Enter your phone number"
+                        placeholder="أدخل رقم هاتفك"
                         value={phone}
                         onChange={(e) => setPhone(e.target.value)}
-                        className="pl-10 border-pink border-opacity-30 focus:border-pink focus:ring-pink"
+                        className="pr-10 border-pink border-opacity-30 focus:border-pink focus:ring-pink"
                       />
                     </div>
                   </div>
 
                   <div className="grid gap-2">
-                    <Label htmlFor="password" className="text-foreground">Password</Label>
+                    <Label htmlFor="password" className="text-foreground">كلمة المرور</Label>
                     <div className="relative">
-                      <Lock className="absolute left-3 top-3 h-4 w-4 text-pink" />
+                      <Lock className="absolute right-3 top-3 h-4 w-4 text-pink" />
                       <Input
                         id="password"
                         type="password"
-                        placeholder="Enter your password"
+                        placeholder="أدخل كلمة المرور"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
-                        className="pl-10 border-pink border-opacity-30 focus:border-pink focus:ring-pink"
+                        className="pr-10 border-pink border-opacity-30 focus:border-pink focus:ring-pink"
                       />
                     </div>
                   </div>
 
                   <Button type="submit" className="w-full bg-pink hover:bg-pinkDark text-white shadow-md" disabled={isLoading}>
-                    {isLoading ? "Logging in..." : "Login"}
+                    {isLoading ? "جاري تسجيل الدخول..." : "تسجيل الدخول"}
                   </Button>
                 </div>
               </form>
             </CardContent>
             <CardFooter className="flex flex-col">
               <p className="text-center text-sm mt-2">
-                Don&apos;t have an account?{" "}
+                ليس لديك حساب؟{" "}
                 <Link href="/register" className="underline text-pink hover:text-pinkDark font-medium">
-                  Register here
+                  سجل هنا
                 </Link>
               </p>
             </CardFooter>

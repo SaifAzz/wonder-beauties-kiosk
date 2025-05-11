@@ -25,8 +25,8 @@ export default function RegisterPage() {
 
         if (!name || !phone || !password || !country) {
             toast({
-                title: "Error",
-                description: "Please fill out all fields",
+                title: "خطأ",
+                description: "يرجى ملء جميع الحقول",
                 variant: "destructive",
             })
             return
@@ -52,16 +52,16 @@ export default function RegisterPage() {
 
             if (!data.success) {
                 toast({
-                    title: "Registration Failed",
-                    description: data.message || "Could not register. Please try again.",
+                    title: "فشل التسجيل",
+                    description: data.message || "تعذر التسجيل. يرجى المحاولة مرة أخرى.",
                     variant: "destructive",
                 })
                 return
             }
 
             toast({
-                title: "Registration Successful",
-                description: "Your account has been created.",
+                title: "تم التسجيل بنجاح",
+                description: "تم إنشاء حسابك.",
             })
 
             // Redirect to login
@@ -69,8 +69,8 @@ export default function RegisterPage() {
         } catch (error) {
             console.error("Registration error:", error)
             toast({
-                title: "Error",
-                description: "An error occurred during registration. Please try again later.",
+                title: "خطأ",
+                description: "حدث خطأ أثناء التسجيل. يرجى المحاولة مرة أخرى لاحقًا.",
                 variant: "destructive",
             })
         } finally {
@@ -82,81 +82,81 @@ export default function RegisterPage() {
         <div className="container flex items-center justify-center min-h-screen py-10">
             <Card className="w-full max-w-md">
                 <CardHeader>
-                    <CardTitle className="text-2xl font-bold text-center">Create an Account</CardTitle>
+                    <CardTitle className="text-2xl font-bold text-center">إنشاء حساب جديد</CardTitle>
                 </CardHeader>
                 <CardContent>
                     <form onSubmit={handleSubmit}>
                         <div className="grid gap-4">
                             <div className="grid gap-2">
-                                <Label htmlFor="name">Full Name</Label>
+                                <Label htmlFor="name">الاسم الكامل</Label>
                                 <div className="relative">
-                                    <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                                    <User className="absolute right-3 top-3 h-4 w-4 text-muted-foreground" />
                                     <Input
                                         id="name"
-                                        placeholder="Enter your full name"
+                                        placeholder="أدخل اسمك الكامل"
                                         value={name}
                                         onChange={(e) => setName(e.target.value)}
-                                        className="pl-10"
+                                        className="pr-10"
                                     />
                                 </div>
                             </div>
 
                             <div className="grid gap-2">
-                                <Label htmlFor="phone">Phone Number</Label>
+                                <Label htmlFor="phone">رقم الهاتف</Label>
                                 <div className="relative">
-                                    <Phone className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                                    <Phone className="absolute right-3 top-3 h-4 w-4 text-muted-foreground" />
                                     <Input
                                         id="phone"
-                                        placeholder="Enter your phone number"
+                                        placeholder="أدخل رقم هاتفك"
                                         value={phone}
                                         onChange={(e) => setPhone(e.target.value)}
-                                        className="pl-10"
+                                        className="pr-10"
                                     />
                                 </div>
                             </div>
 
                             <div className="grid gap-2">
-                                <Label htmlFor="password">Password</Label>
+                                <Label htmlFor="password">كلمة المرور</Label>
                                 <div className="relative">
-                                    <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                                    <Lock className="absolute right-3 top-3 h-4 w-4 text-muted-foreground" />
                                     <Input
                                         id="password"
                                         type="password"
-                                        placeholder="Create a password"
+                                        placeholder="أنشئ كلمة مرور"
                                         value={password}
                                         onChange={(e) => setPassword(e.target.value)}
-                                        className="pl-10"
+                                        className="pr-10"
                                     />
                                 </div>
                             </div>
 
                             <div className="grid gap-2">
-                                <Label htmlFor="country">Country</Label>
+                                <Label htmlFor="country">البلد</Label>
                                 <div className="relative">
-                                    <MapPin className="absolute left-3 top-3 h-4 w-4 text-muted-foreground z-10" />
+                                    <MapPin className="absolute right-3 top-3 h-4 w-4 text-muted-foreground z-10" />
                                     <Select value={country} onValueChange={setCountry}>
-                                        <SelectTrigger className="pl-10">
-                                            <SelectValue placeholder="Select your country" />
+                                        <SelectTrigger className="pr-10">
+                                            <SelectValue placeholder="اختر بلدك" />
                                         </SelectTrigger>
                                         <SelectContent>
-                                            <SelectItem value="Iraq">Iraq</SelectItem>
-                                            <SelectItem value="Syria">Syria</SelectItem>
+                                            <SelectItem value="Iraq">العراق</SelectItem>
+                                            <SelectItem value="Syria">سوريا</SelectItem>
                                         </SelectContent>
                                     </Select>
                                 </div>
                             </div>
 
                             <Button type="submit" className="w-full" disabled={isLoading}>
-                                {isLoading ? "Creating Account..." : "Register"}
+                                {isLoading ? "جاري إنشاء الحساب..." : "تسجيل"}
                             </Button>
                         </div>
                     </form>
                 </CardContent>
                 <CardFooter className="flex flex-col">
                     <p className="text-center text-sm mt-2">
-                        Already have an account?{" "}
+                        لديك حساب بالفعل؟{" "}
                         <Link href="/login" className="underline text-primary">
-                            Login here
+                            تسجيل الدخول هنا
                         </Link>
                     </p>
                 </CardFooter>

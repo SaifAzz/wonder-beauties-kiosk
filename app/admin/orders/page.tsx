@@ -287,7 +287,7 @@ export default function AdminOrdersPage() {
                                                 <TableCell>${item.price.toFixed(2)}</TableCell>
                                                 <TableCell>{item.quantity}</TableCell>
                                                 <TableCell className="text-right">
-                                                    ${(item.price * item.quantity).toFixed(2)}
+                                                    {(item.price * item.quantity).toFixed(2)}
                                                 </TableCell>
                                             </TableRow>
                                         ))}
@@ -296,7 +296,7 @@ export default function AdminOrdersPage() {
                                                 Total
                                             </TableCell>
                                             <TableCell className="text-right font-bold">
-                                                ${selectedOrder.total.toFixed(2)}
+                                                {selectedOrder.total.toFixed(2)}
                                             </TableCell>
                                         </TableRow>
                                     </TableBody>

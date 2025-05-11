@@ -76,8 +76,8 @@ export default function CartPage() {
             } catch (error) {
                 console.error("Error fetching cart:", error)
                 toast({
-                    title: "Error",
-                    description: "Failed to load cart. Please try again.",
+                    title: "خطأ",
+                    description: "فشل في تحميل سلة التسوق. يرجى المحاولة مرة أخرى.",
                     variant: "destructive",
                 })
             } finally {
@@ -123,16 +123,16 @@ export default function CartPage() {
                 })
             } else {
                 toast({
-                    title: "Error",
-                    description: data.message || "Could not update item quantity",
+                    title: "خطأ",
+                    description: data.message || "تعذر تحديث كمية المنتج",
                     variant: "destructive",
                 })
             }
         } catch (error) {
             console.error("Error updating quantity:", error)
             toast({
-                title: "Error",
-                description: "Failed to update quantity",
+                title: "خطأ",
+                description: "فشل في تحديث الكمية",
                 variant: "destructive",
             })
         } finally {
@@ -162,21 +162,21 @@ export default function CartPage() {
                 })
 
                 toast({
-                    title: "Item removed",
-                    description: "Item has been removed from your cart",
+                    title: "تمت إزالة المنتج",
+                    description: "تمت إزالة المنتج من سلة التسوق الخاصة بك",
                 })
             } else {
                 toast({
-                    title: "Error",
-                    description: data.message || "Could not remove item",
+                    title: "خطأ",
+                    description: data.message || "تعذر إزالة المنتج",
                     variant: "destructive",
                 })
             }
         } catch (error) {
             console.error("Error removing item:", error)
             toast({
-                title: "Error",
-                description: "Failed to remove item",
+                title: "خطأ",
+                description: "فشل في إزالة المنتج",
                 variant: "destructive",
             })
         } finally {
@@ -199,21 +199,21 @@ export default function CartPage() {
                 setCart(prev => prev ? { ...prev, items: [] } : prev)
 
                 toast({
-                    title: "Cart cleared",
-                    description: "All items have been removed from your cart",
+                    title: "تم مسح السلة",
+                    description: "تمت إزالة جميع المنتجات من سلة التسوق الخاصة بك",
                 })
             } else {
                 toast({
-                    title: "Error",
-                    description: data.message || "Could not clear cart",
+                    title: "خطأ",
+                    description: data.message || "تعذر مسح السلة",
                     variant: "destructive",
                 })
             }
         } catch (error) {
             console.error("Error clearing cart:", error)
             toast({
-                title: "Error",
-                description: "Failed to clear cart",
+                title: "خطأ",
+                description: "فشل في مسح السلة",
                 variant: "destructive",
             })
         } finally {
@@ -237,31 +237,31 @@ export default function CartPage() {
             if (data.success) {
                 if (data.hasPendingDebt) {
                     toast({
-                        title: "Order placed with pending payment",
+                        title: "تم تقديم الطلب مع دفعة معلقة",
                         description: data.message,
                     })
                 } else {
                     toast({
-                        title: "Order placed!",
-                        description: "Your order has been placed successfully",
+                        title: "تم تقديم الطلب!",
+                        description: "تم تقديم طلبك بنجاح",
                     })
                 }
 
                 // Clear cart and redirect
                 setCart(prev => prev ? { ...prev, items: [] } : prev)
-                router.push("/catalog")
+                router.push("/balance")
             } else {
                 toast({
-                    title: "Checkout failed",
-                    description: data.message || "Could not complete your order",
+                    title: "خطأ",
+                    description: data.message || "تعذر إكمال عملية الشراء",
                     variant: "destructive",
                 })
             }
         } catch (error) {
-            console.error("Error during checkout:", error)
+            console.error("Error checking out:", error)
             toast({
-                title: "Checkout failed",
-                description: "An error occurred during checkout. Please try again.",
+                title: "خطأ",
+                description: "فشل في إكمال عملية الشراء",
                 variant: "destructive",
             })
         } finally {
@@ -269,134 +269,157 @@ export default function CartPage() {
         }
     }
 
-    // Calculate total cost of items in cart
     const calculateTotal = () => {
-        if (!cart || cart.items.length === 0) return 0
+        if (!cart || !cart.items || cart.items.length === 0) {
+            return 0
+        }
 
         return cart.items.reduce((total, item) => {
             return total + (item.quantity * item.product.price)
         }, 0)
     }
 
-    // Calculate cart total
-    const cartTotal = cart?.items.reduce(
-        (total, item) => total + item.product.price * item.quantity,
-        0
-    ) || 0
-
-    // Check if we have enough balance
-    const hasEnoughBalance = userBalance >= cartTotal
-
-    // Update the UI to show balance/debt information
     const renderUserAccount = () => {
-        const cartTotal = calculateTotal()
-        const willCreateDebt = cartTotal > userBalance
-        const newDebtAmount = willCreateDebt ? cartTotal - userBalance : 0
-        const totalDebtAfterOrder = userOutstandingDebt + newDebtAmount
-
-        return (
-            <div className="mb-6 p-4 border rounded-md bg-background">
-                <h3 className="text-lg font-semibold mb-2">Your Account</h3>
-                <div className="space-y-2">
-                    <div className="flex justify-between">
-                        <span>Current Balance:</span>
-                        <span className="font-medium">${userBalance.toFixed(2)}</span>
-                    </div>
-
-                    {userOutstandingDebt > 0 && (
-                        <div className="flex justify-between">
-                            <span>Outstanding Debt:</span>
-                            <span className="font-medium text-red-500">${userOutstandingDebt.toFixed(2)}</span>
-                        </div>
-                    )}
-
-                    {willCreateDebt && (
-                        <>
-                            <div className="flex justify-between text-amber-600">
-                                <span>New Debt from Order:</span>
-                                <span className="font-medium">${newDebtAmount.toFixed(2)}</span>
-                            </div>
-                            <div className="flex justify-between text-red-500 font-semibold border-t pt-2">
-                                <span>Total Debt After Order:</span>
-                                <span>${totalDebtAfterOrder.toFixed(2)}</span>
-                            </div>
-                        </>
-                    )}
-                </div>
-            </div>
-        )
+        if (userOutstandingDebt > 0) {
+            return (
+                <Alert className="mb-4 bg-amber-50 border-amber-200">
+                    <AlertTitle className="text-amber-800 flex items-center gap-2">
+                        <CreditCard className="h-4 w-4" />
+                        رصيد مستحق
+                    </AlertTitle>
+                    <AlertDescription className="text-amber-700">
+                        لديك رصيد مستحق بقيمة ${userOutstandingDebt.toFixed(2)}. سيتم إضافة مشترياتك الجديدة إلى رصيدك الحالي.
+                    </AlertDescription>
+                </Alert>
+            )
+        }
+        return null
     }
 
     if (loading) {
         return (
             <div className="container py-10">
-                <h1 className="text-3xl font-bold mb-8">Your Cart</h1>
-                <p>Loading cart...</p>
+                <div className="flex items-center gap-2 mb-6">
+                    <Link href="/catalog">
+                        <Button variant="ghost" size="icon" className="h-8 w-8">
+                            <ArrowLeft className="h-4 w-4" />
+                        </Button>
+                    </Link>
+                    <h1 className="text-2xl font-bold">سلة التسوق</h1>
+                </div>
+                <Card>
+                    <CardContent className="p-6">
+                        <p className="text-center py-8">جاري التحميل...</p>
+                    </CardContent>
+                </Card>
             </div>
         )
     }
 
-    if (!cart || cart.items.length === 0) {
+    if (!cart || !cart.items || cart.items.length === 0) {
         return (
             <div className="container py-10">
-                <div className="flex justify-between items-center mb-8">
-                    <h1 className="text-3xl font-bold">Your Cart</h1>
-                    <Button asChild variant="outline">
-                        <Link href="/catalog">
-                            <ArrowLeft className="mr-2 h-4 w-4" />
-                            Back to Catalog
-                        </Link>
-                    </Button>
+                <div className="flex items-center gap-2 mb-6">
+                    <Link href="/catalog">
+                        <Button variant="ghost" size="icon" className="h-8 w-8">
+                            <ArrowLeft className="h-4 w-4" />
+                        </Button>
+                    </Link>
+                    <h1 className="text-2xl font-bold">سلة التسوق</h1>
                 </div>
-
-                <Alert className="mb-8">
-                    <AlertTitle>Your cart is empty</AlertTitle>
-                    <AlertDescription>
-                        You haven't added any products to your cart yet. Visit the catalog to find delicious treats!
-                    </AlertDescription>
-                </Alert>
-
-                <Button asChild>
-                    <Link href="/catalog">Browse Products</Link>
-                </Button>
+                <Card>
+                    <CardContent className="p-6 text-center">
+                        <div className="py-8 flex flex-col items-center">
+                            <ShoppingCart className="h-12 w-12 text-muted-foreground mb-4" />
+                            <h2 className="text-xl font-semibold mb-2">سلة التسوق فارغة</h2>
+                            <p className="text-muted-foreground mb-6">
+                                لم تقم بإضافة أي منتجات إلى سلة التسوق الخاصة بك بعد.
+                            </p>
+                            <Button asChild>
+                                <Link href="/catalog">تصفح المنتجات</Link>
+                            </Button>
+                        </div>
+                    </CardContent>
+                </Card>
             </div>
         )
     }
+
+    const total = calculateTotal()
 
     return (
         <div className="container py-10">
-            <div className="flex justify-between items-center mb-8">
-                <h1 className="text-3xl font-bold">Your Cart</h1>
-                <Button asChild variant="outline">
-                    <Link href="/catalog">
-                        <ArrowLeft className="mr-2 h-4 w-4" />
-                        Back to Catalog
-                    </Link>
-                </Button>
+            <div className="flex items-center gap-2 mb-6">
+                <Link href="/catalog">
+                    <Button variant="ghost" size="icon" className="h-8 w-8">
+                        <ArrowLeft className="h-4 w-4" />
+                    </Button>
+                </Link>
+                <h1 className="text-2xl font-bold">سلة التسوق</h1>
             </div>
 
             {renderUserAccount()}
 
             <Card className="mb-6">
-                <CardHeader>
-                    <CardTitle>Items</CardTitle>
+                <CardHeader className="pb-3">
+                    <div className="flex justify-between items-center">
+                        <CardTitle>منتجاتك</CardTitle>
+                        <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                                <Button variant="outline" size="sm" disabled={isUpdating}>
+                                    <Trash2 className="h-4 w-4 ml-2" />
+                                    مسح السلة
+                                </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                                <AlertDialogHeader>
+                                    <AlertDialogTitle>مسح سلة التسوق؟</AlertDialogTitle>
+                                    <AlertDialogDescription>
+                                        هل أنت متأكد من أنك تريد إزالة جميع المنتجات من سلة التسوق الخاصة بك؟ لا يمكن التراجع عن هذا الإجراء.
+                                    </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                    <AlertDialogCancel>إلغاء</AlertDialogCancel>
+                                    <AlertDialogAction onClick={clearCart}>مسح السلة</AlertDialogAction>
+                                </AlertDialogFooter>
+                            </AlertDialogContent>
+                        </AlertDialog>
+                    </div>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="p-0">
                     <Table>
                         <TableHeader>
                             <TableRow>
-                                <TableHead>Product</TableHead>
-                                <TableHead>Price</TableHead>
-                                <TableHead>Quantity</TableHead>
-                                <TableHead>Subtotal</TableHead>
+                                <TableHead>المنتج</TableHead>
+                                <TableHead className="text-right">السعر</TableHead>
+                                <TableHead>الكمية</TableHead>
+                                <TableHead className="text-right">الإجمالي</TableHead>
                                 <TableHead></TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {cart?.items.map((item) => (
+                            {cart.items.map((item) => (
                                 <TableRow key={item.id}>
-                                    <TableCell className="font-medium">{item.product.name}</TableCell>
-                                    <TableCell>${item.product.price.toFixed(2)}</TableCell>
+                                    <TableCell className="font-medium">
+                                        <div className="flex items-center gap-3">
+                                            {item.product.image && (
+                                                <div className="h-12 w-12 rounded overflow-hidden">
+                                                    <img
+                                                        src={item.product.image}
+                                                        alt={item.product.name}
+                                                        className="h-full w-full object-cover"
+                                                    />
+                                                </div>
+                                            )}
+                                            <div>
+                                                <div>{item.product.name}</div>
+                                                <div className="text-xs text-muted-foreground">
+                                                    {item.product.country === "Iraq" ? "العراق" : "سوريا"}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </TableCell>
+                                    <TableCell className="text-right">${item.product.price.toFixed(2)}</TableCell>
                                     <TableCell>
                                         <div className="flex items-center">
                                             <Button
@@ -404,11 +427,11 @@ export default function CartPage() {
                                                 size="icon"
                                                 className="h-8 w-8"
                                                 onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                                                disabled={isUpdating || item.quantity <= 1}
+                                                disabled={isUpdating}
                                             >
-                                                <Minus className="h-4 w-4" />
+                                                <Minus className="h-3 w-3" />
                                             </Button>
-                                            <span className="mx-3">{item.quantity}</span>
+                                            <span className="w-8 text-center">{item.quantity}</span>
                                             <Button
                                                 variant="outline"
                                                 size="icon"
@@ -416,15 +439,18 @@ export default function CartPage() {
                                                 onClick={() => updateQuantity(item.id, item.quantity + 1)}
                                                 disabled={isUpdating || item.quantity >= item.product.quantity}
                                             >
-                                                <Plus className="h-4 w-4" />
+                                                <Plus className="h-3 w-3" />
                                             </Button>
                                         </div>
                                     </TableCell>
-                                    <TableCell>${(item.product.price * item.quantity).toFixed(2)}</TableCell>
+                                    <TableCell className="text-right font-medium">
+                                        ${(item.quantity * item.product.price).toFixed(2)}
+                                    </TableCell>
                                     <TableCell>
                                         <Button
                                             variant="ghost"
                                             size="icon"
+                                            className="h-8 w-8"
                                             onClick={() => removeItem(item.id)}
                                             disabled={isUpdating}
                                         >
@@ -436,46 +462,20 @@ export default function CartPage() {
                         </TableBody>
                     </Table>
                 </CardContent>
-                <CardFooter className="flex justify-between">
-                    <AlertDialog>
-                        <AlertDialogTrigger asChild>
-                            <Button variant="outline" disabled={isUpdating}>
-                                <Trash2 className="mr-2 h-4 w-4" />
-                                Clear Cart
-                            </Button>
-                        </AlertDialogTrigger>
-                        <AlertDialogContent>
-                            <AlertDialogHeader>
-                                <AlertDialogTitle>Clear your cart?</AlertDialogTitle>
-                                <AlertDialogDescription>
-                                    This will remove all items from your cart. This action cannot be undone.
-                                </AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter>
-                                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                <AlertDialogAction onClick={clearCart}>Clear Cart</AlertDialogAction>
-                            </AlertDialogFooter>
-                        </AlertDialogContent>
-                    </AlertDialog>
-                    <div className="text-xl font-bold">
-                        Total: ${calculateTotal().toFixed(2)}
-                    </div>
+                <CardFooter className="flex justify-between pt-6">
+                    <div className="text-lg font-bold">الإجمالي: ${total.toFixed(2)}</div>
                 </CardFooter>
             </Card>
 
             <div className="flex justify-between">
-                <Button asChild variant="outline">
+                <Button variant="outline" asChild>
                     <Link href="/catalog">
-                        <ArrowLeft className="mr-2 h-4 w-4" />
-                        Continue Shopping
+                        <ArrowLeft className="ml-2 h-4 w-4" />
+                        مواصلة التسوق
                     </Link>
                 </Button>
-                <Button
-                    onClick={checkout}
-                    disabled={isCheckingOut || !cart?.items.length}
-                >
-                    <CreditCard className="mr-2 h-4 w-4" />
-                    {calculateTotal() > userBalance ? "Checkout (On Credit)" : "Checkout"}
+                <Button onClick={checkout} disabled={isCheckingOut}>
+                    {isCheckingOut ? "جاري إتمام الطلب..." : "إتمام الطلب"}
                 </Button>
             </div>
         </div>

@@ -66,16 +66,16 @@ export default function AdminProductsPage() {
                 }
             } else {
                 toast({
-                    title: "Error",
-                    description: "Failed to load products. Please try again.",
+                    title: "خطأ",
+                    description: "فشل في تحميل المنتجات. يرجى المحاولة مرة أخرى.",
                     variant: "destructive",
                 })
             }
         } catch (error) {
             console.error("Error fetching products:", error)
             toast({
-                title: "Error",
-                description: "Failed to load products. Please try again.",
+                title: "خطأ",
+                description: "فشل في تحميل المنتجات. يرجى المحاولة مرة أخرى.",
                 variant: "destructive",
             })
         } finally {
@@ -112,8 +112,8 @@ export default function AdminProductsPage() {
         try {
             if (!name || !price || !quantity || !country) {
                 toast({
-                    title: "Missing fields",
-                    description: "Please fill out all required fields",
+                    title: "حقول مفقودة",
+                    description: "يرجى ملء جميع الحقول المطلوبة",
                     variant: "destructive",
                 })
                 return
@@ -142,8 +142,8 @@ export default function AdminProductsPage() {
 
             if (data.success) {
                 toast({
-                    title: "Success",
-                    description: "Product added successfully",
+                    title: "نجاح",
+                    description: "تمت إضافة المنتج بنجاح",
                 })
 
                 // Add to the list and reset form
@@ -152,16 +152,16 @@ export default function AdminProductsPage() {
                 setIsAddDialogOpen(false)
             } else {
                 toast({
-                    title: "Error",
-                    description: data.message || "Failed to add product",
+                    title: "خطأ",
+                    description: data.message || "فشل في إضافة المنتج",
                     variant: "destructive",
                 })
             }
         } catch (error) {
             console.error("Error adding product:", error)
             toast({
-                title: "Error",
-                description: "Failed to add product",
+                title: "خطأ",
+                description: "فشل في إضافة المنتج",
                 variant: "destructive",
             })
         }
@@ -185,8 +185,8 @@ export default function AdminProductsPage() {
 
             if (!name || !price || !quantity || !country) {
                 toast({
-                    title: "Missing fields",
-                    description: "Please fill out all required fields",
+                    title: "حقول مفقودة",
+                    description: "يرجى ملء جميع الحقول المطلوبة",
                     variant: "destructive",
                 })
                 return
@@ -215,8 +215,8 @@ export default function AdminProductsPage() {
 
             if (data.success) {
                 toast({
-                    title: "Success",
-                    description: "Product updated successfully",
+                    title: "نجاح",
+                    description: "تم تحديث المنتج بنجاح",
                 })
 
                 // Update in the list
@@ -228,16 +228,16 @@ export default function AdminProductsPage() {
                 setIsEditDialogOpen(false)
             } else {
                 toast({
-                    title: "Error",
-                    description: data.message || "Failed to update product",
+                    title: "خطأ",
+                    description: data.message || "فشل في تحديث المنتج",
                     variant: "destructive",
                 })
             }
         } catch (error) {
             console.error("Error updating product:", error)
             toast({
-                title: "Error",
-                description: "Failed to update product",
+                title: "خطأ",
+                description: "فشل في تحديث المنتج",
                 variant: "destructive",
             })
         }
@@ -253,24 +253,24 @@ export default function AdminProductsPage() {
 
             if (data.success) {
                 toast({
-                    title: "Success",
-                    description: "Product deleted successfully",
+                    title: "نجاح",
+                    description: "تم حذف المنتج بنجاح",
                 })
 
                 // Remove from the list
                 setProducts(products.filter(p => p.id !== productId))
             } else {
                 toast({
-                    title: "Error",
-                    description: data.message || "Failed to delete product",
+                    title: "خطأ",
+                    description: data.message || "فشل في حذف المنتج",
                     variant: "destructive",
                 })
             }
         } catch (error) {
             console.error("Error deleting product:", error)
             toast({
-                title: "Error",
-                description: "Failed to delete product",
+                title: "خطأ",
+                description: "فشل في حذف المنتج",
                 variant: "destructive",
             })
         }
@@ -278,278 +278,267 @@ export default function AdminProductsPage() {
 
     const restock = async (productId: string, amount: number) => {
         try {
-            const product = products.find(p => p.id === productId)
-            if (!product) return
-
-            const newQuantity = product.quantity + amount
-
-            const response = await fetch(`/api/products/${productId}`, {
-                method: "PATCH",
+            const response = await fetch(`/api/products/${productId}/restock`, {
+                method: "POST",
                 headers: {
                     "Content-Type": "application/json",
                 },
-                body: JSON.stringify({
-                    quantity: newQuantity
-                }),
+                body: JSON.stringify({ amount }),
             })
 
             const data = await response.json()
 
             if (data.success) {
                 toast({
-                    title: "Success",
-                    description: `Added ${amount} units to products`,
+                    title: "نجاح",
+                    description: `تم إعادة تخزين المنتج بـ ${amount} وحدة`,
                 })
 
                 // Update in the list
                 setProducts(products.map(p =>
-                    p.id === productId ? { ...p, quantity: newQuantity } : p
+                    p.id === productId ? { ...p, quantity: p.quantity + amount } : p
                 ))
             } else {
                 toast({
-                    title: "Error",
-                    description: data.message || "Failed to restock product",
+                    title: "خطأ",
+                    description: data.message || "فشل في إعادة تخزين المنتج",
                     variant: "destructive",
                 })
             }
         } catch (error) {
             console.error("Error restocking product:", error)
             toast({
-                title: "Error",
-                description: "Failed to restock product",
+                title: "خطأ",
+                description: "فشل في إعادة تخزين المنتج",
                 variant: "destructive",
             })
         }
     }
 
-    if (loading) {
-        return (
-            <div className="container py-10">
-                <h1 className="text-3xl font-bold mb-8">Product Management</h1>
-                <p>Loading products...</p>
-            </div>
-        )
-    }
-
     return (
-        <div className="container py-6">
-            <div className="flex items-center justify-between mb-6">
-                <h1 className="text-3xl font-bold">Products Management</h1>
+        <div>
+            <div className="flex justify-between items-center mb-6">
+                <h1 className="text-2xl font-bold">إدارة المنتجات</h1>
                 <Link href="/admin/products/add">
                     <Button>
                         <PlusCircle className="mr-2 h-4 w-4" />
-                        Add New Product
+                        إضافة منتج جديد
                     </Button>
                 </Link>
             </div>
 
             <Tabs defaultValue="all">
                 <TabsList className="mb-4">
-                    <TabsTrigger value="all">All Products</TabsTrigger>
-                    <TabsTrigger value="iraq">Iraq</TabsTrigger>
-                    <TabsTrigger value="syria">Syria</TabsTrigger>
-                    <TabsTrigger value="low-stock">Low Stock</TabsTrigger>
+                    <TabsTrigger value="all">جميع المنتجات</TabsTrigger>
+                    <TabsTrigger value="iraq">العراق</TabsTrigger>
+                    <TabsTrigger value="syria">سوريا</TabsTrigger>
+                    <TabsTrigger value="low-stock">مخزون منخفض</TabsTrigger>
                 </TabsList>
 
-                <TabsContent value="all">
-                    <ProductTable
-                        products={products}
-                        onEdit={openEditDialog}
-                        onDelete={handleDeleteProduct}
-                        onRestock={restock}
-                    />
+                <TabsContent value="all" className="space-y-4">
+                    <Card>
+                        <CardContent className="p-0">
+                            {loading ? (
+                                <div className="flex justify-center items-center h-64">
+                                    <p>جاري التحميل...</p>
+                                </div>
+                            ) : products.length === 0 ? (
+                                <div className="flex flex-col justify-center items-center h-64">
+                                    <Package className="h-12 w-12 text-muted-foreground mb-4" />
+                                    <p className="text-lg font-medium">لا توجد منتجات</p>
+                                    <p className="text-muted-foreground">أضف منتجًا جديدًا للبدء</p>
+                                </div>
+                            ) : (
+                                <ProductTable
+                                    products={products}
+                                    onEdit={openEditDialog}
+                                    onDelete={handleDeleteProduct}
+                                    onRestock={restock}
+                                />
+                            )}
+                        </CardContent>
+                    </Card>
                 </TabsContent>
 
-                <TabsContent value="iraq">
-                    <ProductTable
-                        products={products.filter(p => p.country === "Iraq")}
-                        onEdit={openEditDialog}
-                        onDelete={handleDeleteProduct}
-                        onRestock={restock}
-                    />
+                <TabsContent value="iraq" className="space-y-4">
+                    <Card>
+                        <CardContent className="p-0">
+                            {loading ? (
+                                <div className="flex justify-center items-center h-64">
+                                    <p>جاري التحميل...</p>
+                                </div>
+                            ) : (
+                                <ProductTable
+                                    products={products.filter(p => p.country === "Iraq")}
+                                    onEdit={openEditDialog}
+                                    onDelete={handleDeleteProduct}
+                                    onRestock={restock}
+                                />
+                            )}
+                        </CardContent>
+                    </Card>
                 </TabsContent>
 
-                <TabsContent value="syria">
-                    <ProductTable
-                        products={products.filter(p => p.country === "Syria")}
-                        onEdit={openEditDialog}
-                        onDelete={handleDeleteProduct}
-                        onRestock={restock}
-                    />
+                <TabsContent value="syria" className="space-y-4">
+                    <Card>
+                        <CardContent className="p-0">
+                            {loading ? (
+                                <div className="flex justify-center items-center h-64">
+                                    <p>جاري التحميل...</p>
+                                </div>
+                            ) : (
+                                <ProductTable
+                                    products={products.filter(p => p.country === "Syria")}
+                                    onEdit={openEditDialog}
+                                    onDelete={handleDeleteProduct}
+                                    onRestock={restock}
+                                />
+                            )}
+                        </CardContent>
+                    </Card>
                 </TabsContent>
 
-                <TabsContent value="low-stock">
-                    <ProductTable
-                        products={products.filter(p => p.quantity < 10)}
-                        onEdit={openEditDialog}
-                        onDelete={handleDeleteProduct}
-                        onRestock={restock}
-                    />
+                <TabsContent value="low-stock" className="space-y-4">
+                    <Card>
+                        <CardContent className="p-0">
+                            {loading ? (
+                                <div className="flex justify-center items-center h-64">
+                                    <p>جاري التحميل...</p>
+                                </div>
+                            ) : (
+                                <ProductTable
+                                    products={products.filter(p => p.quantity < 10)}
+                                    onEdit={openEditDialog}
+                                    onDelete={handleDeleteProduct}
+                                    onRestock={restock}
+                                />
+                            )}
+                        </CardContent>
+                    </Card>
                 </TabsContent>
             </Tabs>
 
-            {/* Add Product Dialog */}
-            <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-                <DialogContent className="max-w-md">
+            {/* Edit Product Dialog */}
+            <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+                <DialogContent className="sm:max-w-[425px]">
                     <DialogHeader>
-                        <DialogTitle>Add New Product</DialogTitle>
+                        <DialogTitle>تعديل المنتج</DialogTitle>
                     </DialogHeader>
-
-                    <div className="space-y-4 py-4">
-                        <div className="space-y-2">
-                            <Label htmlFor="name">Product Name</Label>
+                    <div className="grid gap-4 py-4">
+                        <div className="grid gap-2">
+                            <Label htmlFor="edit-name">اسم المنتج</Label>
                             <Input
-                                id="name"
-                                placeholder="Enter product name"
+                                id="edit-name"
                                 value={name}
                                 onChange={(e) => setName(e.target.value)}
                             />
                         </div>
-
-                        <div className="space-y-2">
-                            <Label htmlFor="description">Description (Optional)</Label>
+                        <div className="grid gap-2">
+                            <Label htmlFor="edit-description">الوصف</Label>
                             <Textarea
-                                id="description"
-                                placeholder="Enter product description"
+                                id="edit-description"
                                 value={description}
                                 onChange={(e) => setDescription(e.target.value)}
                             />
                         </div>
-
                         <div className="grid grid-cols-2 gap-4">
-                            <div className="space-y-2">
-                                <Label htmlFor="price">Price</Label>
+                            <div className="grid gap-2">
+                                <Label htmlFor="edit-price">السعر</Label>
                                 <Input
-                                    id="price"
-                                    placeholder="0.00"
+                                    id="edit-price"
+                                    type="number"
+                                    step="0.01"
                                     value={price}
                                     onChange={(e) => setPrice(e.target.value)}
-                                    type="number"
-                                    min="0"
-                                    step="0.01"
                                 />
                             </div>
-
-                            <div className="space-y-2">
-                                <Label htmlFor="quantity">Quantity</Label>
+                            <div className="grid gap-2">
+                                <Label htmlFor="edit-quantity">الكمية</Label>
                                 <Input
-                                    id="quantity"
-                                    placeholder="0"
+                                    id="edit-quantity"
+                                    type="number"
                                     value={quantity}
                                     onChange={(e) => setQuantity(e.target.value)}
-                                    type="number"
-                                    min="0"
-                                    step="1"
                                 />
                             </div>
                         </div>
-
-                        <div className="space-y-2">
-                            <Label htmlFor="country">Country</Label>
+                        <div className="grid gap-2">
+                            <Label htmlFor="edit-country">البلد</Label>
                             <Select value={country} onValueChange={setCountry}>
                                 <SelectTrigger>
-                                    <SelectValue placeholder="Select country" />
+                                    <SelectValue placeholder="اختر البلد" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="Iraq">Iraq</SelectItem>
-                                    <SelectItem value="Syria">Syria</SelectItem>
+                                    <SelectItem value="Iraq">العراق</SelectItem>
+                                    <SelectItem value="Syria">سوريا</SelectItem>
                                 </SelectContent>
                             </Select>
                         </div>
-
-
-                        <div className="space-y-2">
-                            <Label htmlFor="image">Product Image</Label>
+                        <div className="grid gap-2">
+                            <Label htmlFor="edit-image">صورة المنتج</Label>
                             <div className="flex items-center gap-4">
-                                <div className="flex-1">
-                                    <Label
-                                        htmlFor="image"
-                                        className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-md cursor-pointer hover:bg-muted/50"
-                                    >
-                                        <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                                            <Upload className="w-8 h-8 mb-2 text-muted-foreground" />
-                                            <p className="text-sm text-muted-foreground">Click to upload or drag and drop</p>
-                                        </div>
-                                        <Input
-                                            id="image"
-                                            type="file"
-                                            className="hidden"
-                                            accept="image/*"
-                                            onChange={handleImageChange}
-                                        />
-                                    </Label>
-                                </div>
+                                <Label
+                                    htmlFor="edit-image"
+                                    className="flex flex-col items-center justify-center w-full h-24 border-2 border-dashed rounded-md cursor-pointer hover:bg-muted/50"
+                                >
+                                    <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                                        <Upload className="w-6 h-6 mb-2 text-muted-foreground" />
+                                        <p className="text-xs text-muted-foreground">انقر للتحميل</p>
+                                    </div>
+                                    <Input
+                                        id="edit-image"
+                                        type="file"
+                                        className="hidden"
+                                        accept="image/*"
+                                        onChange={handleImageChange}
+                                    />
+                                </Label>
 
                                 {imagePreview && (
-                                    <div className="relative h-32 w-32 overflow-hidden rounded-md border">
+                                    <div className="relative h-24 w-24 overflow-hidden rounded-md border">
                                         <img
-                                            src={imagePreview || "/placeholder.svg"}
-                                            alt="Preview"
+                                            src={imagePreview}
+                                            alt="معاينة"
                                             className="h-full w-full object-cover"
                                         />
                                     </div>
                                 )}
                             </div>
                         </div>
-
-                        <div className="flex justify-end gap-2">
-                            <Button variant="outline" onClick={() => {
-                                resetForm()
-                                setIsAddDialogOpen(false)
-                            }}>
-                                Cancel
-                            </Button>
-                            <Button onClick={handleAddProduct}>
-                                Add Product
-                            </Button>
-                        </div>
+                    </div>
+                    <div className="flex justify-end gap-2">
+                        <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>
+                            إلغاء
+                        </Button>
+                        <Button onClick={handleUpdateProduct}>
+                            حفظ التغييرات
+                        </Button>
                     </div>
                 </DialogContent>
             </Dialog>
 
-            {/* Edit Product Dialog */}
-            <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-                <DialogContent className="max-w-md">
+            {/* Restock Dialog */}
+            <Dialog>
+                <DialogContent className="sm:max-w-[425px]">
                     <DialogHeader>
-                        <DialogTitle>Edit Product</DialogTitle>
+                        <DialogTitle>إعادة تخزين المنتج</DialogTitle>
                     </DialogHeader>
-                    <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                            <Label htmlFor="edit-price">Price</Label>
+                    <div className="grid gap-4 py-4">
+                        <div className="grid gap-2">
+                            <Label htmlFor="restock-amount">كمية إعادة التخزين</Label>
                             <Input
-                                id="edit-price"
-                                placeholder="0.00"
-                                value={price}
-                                onChange={(e) => setPrice(e.target.value)}
+                                id="restock-amount"
                                 type="number"
-                                min="0"
-                                step="0.01"
-                            />
-                        </div>
-
-                        <div className="space-y-2">
-                            <Label htmlFor="edit-quantity">Quantity</Label>
-                            <Input
-                                id="edit-quantity"
-                                placeholder="0"
-                                value={quantity}
-                                onChange={(e) => setQuantity(e.target.value)}
-                                type="number"
-                                min="0"
-                                step="1"
+                                min="1"
                             />
                         </div>
                     </div>
-
                     <div className="flex justify-end gap-2">
-                        <Button variant="outline" onClick={() => {
-                            resetForm()
-                            setIsEditDialogOpen(false)
-                        }}>
-                            Cancel
+                        <Button variant="outline">
+                            إلغاء
                         </Button>
-                        <Button onClick={handleUpdateProduct}>
-                            Update Product
+                        <Button>
+                            إعادة تخزين
                         </Button>
                     </div>
                 </DialogContent>
@@ -566,84 +555,182 @@ interface ProductTableProps {
 }
 
 function ProductTable({ products, onEdit, onDelete, onRestock }: ProductTableProps) {
+    const [restockAmount, setRestockAmount] = useState<Record<string, number>>({})
+    const [isRestockDialogOpen, setIsRestockDialogOpen] = useState(false)
+    const [restockingProductId, setRestockingProductId] = useState<string | null>(null)
+
+    const openRestockDialog = (productId: string) => {
+        setRestockingProductId(productId)
+        setIsRestockDialogOpen(true)
+    }
+
+    const handleRestock = () => {
+        if (restockingProductId && restockAmount[restockingProductId]) {
+            onRestock(restockingProductId, restockAmount[restockingProductId])
+            setIsRestockDialogOpen(false)
+            setRestockingProductId(null)
+            // Reset the amount for this product
+            setRestockAmount(prev => ({
+                ...prev,
+                [restockingProductId]: 0
+            }))
+        }
+    }
+
     return (
-        <Card>
-            <CardHeader>
-                <CardTitle>Products ({products.length})</CardTitle>
-            </CardHeader>
-            <CardContent>
-                {products.length === 0 ? (
-                    <p className="text-center py-4 text-muted-foreground">No products found</p>
-                ) : (
-                    <Table>
-                        <TableHeader>
-                            <TableRow>
-                                <TableHead>Name</TableHead>
-                                <TableHead>Country</TableHead>
-                                <TableHead>Price</TableHead>
-                                <TableHead>Stock</TableHead>
-                                <TableHead className="text-right">Actions</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {products.map((product) => (
-                                <TableRow key={product.id}>
-                                    <TableCell className="font-medium">{product.name}</TableCell>
-                                    <TableCell>{product.country}</TableCell>
-                                    <TableCell>${product.price.toFixed(2)}</TableCell>
-                                    <TableCell>
-                                        <span className={`${product.quantity < 10 ? "text-red-500 font-medium" : ""}`}>
+        <>
+            <Table>
+                <TableHeader>
+                    <TableRow>
+                        <TableHead>المنتج</TableHead>
+                        <TableHead>البلد</TableHead>
+                        <TableHead>السعر</TableHead>
+                        <TableHead>المخزون</TableHead>
+                        <TableHead>الإجراءات</TableHead>
+                    </TableRow>
+                </TableHeader>
+                <TableBody>
+                    {products.length === 0 ? (
+                        <TableRow>
+                            <TableCell colSpan={5} className="text-center py-8">
+                                لا توجد منتجات لعرضها
+                            </TableCell>
+                        </TableRow>
+                    ) : (
+                        products.map((product) => (
+                            <TableRow key={product.id}>
+                                <TableCell className="flex items-center gap-3">
+                                    {product.image ? (
+                                        <div className="h-10 w-10 rounded-md overflow-hidden">
+                                            <img
+                                                src={product.image}
+                                                alt={product.name}
+                                                className="h-full w-full object-cover"
+                                            />
+                                        </div>
+                                    ) : (
+                                        <div className="h-10 w-10 bg-muted rounded-md flex items-center justify-center">
+                                            <Package className="h-5 w-5" />
+                                        </div>
+                                    )}
+                                    <div>
+                                        <p className="font-medium">{product.name}</p>
+                                        {product.description && (
+                                            <p className="text-sm text-muted-foreground line-clamp-1">
+                                                {product.description}
+                                            </p>
+                                        )}
+                                    </div>
+                                </TableCell>
+                                <TableCell>
+                                    {product.country === "Iraq" ? "العراق" : "سوريا"}
+                                </TableCell>
+                                <TableCell>${product.price.toFixed(2)}</TableCell>
+                                <TableCell>
+                                    <div className="flex items-center gap-2">
+                                        <span className={product.quantity < 10 ? "text-red-500 font-medium" : ""}>
                                             {product.quantity}
                                         </span>
-                                    </TableCell>
-                                    <TableCell className="text-right">
-                                        <div className="flex justify-end gap-2">
+                                        <div className="flex items-center gap-1">
+                                            <Input
+                                                type="number"
+                                                min="1"
+                                                className="w-16 h-8"
+                                                value={restockAmount[product.id] || ""}
+                                                onChange={(e) => setRestockAmount({
+                                                    ...restockAmount,
+                                                    [product.id]: parseInt(e.target.value) || 0
+                                                })}
+                                            />
                                             <Button
                                                 variant="outline"
                                                 size="sm"
-                                                onClick={() => onRestock(product.id, 10)}
+                                                className="h-8"
+                                                onClick={() => {
+                                                    if (restockAmount[product.id]) {
+                                                        onRestock(product.id, restockAmount[product.id])
+                                                    }
+                                                }}
+                                                disabled={!restockAmount[product.id]}
                                             >
-                                                <Package className="h-4 w-4 mr-1" />
-                                                +10
+                                                +
                                             </Button>
-                                            <Button
-                                                variant="outline"
-                                                size="sm"
-                                                onClick={() => onEdit(product)}
-                                            >
-                                                <Edit className="h-4 w-4" />
-                                            </Button>
-                                            <AlertDialog>
-                                                <AlertDialogTrigger asChild>
-                                                    <Button
-                                                        variant="outline"
-                                                        size="sm"
-                                                        className="text-destructive hover:text-destructive"
-                                                    >
-                                                        <Trash2 className="h-4 w-4" />
-                                                    </Button>
-                                                </AlertDialogTrigger>
-                                                <AlertDialogContent>
-                                                    <AlertDialogHeader>
-                                                        <AlertDialogTitle>Delete product?</AlertDialogTitle>
-                                                        <AlertDialogDescription>
-                                                            This will permanently delete "{product.name}". This action cannot be undone.
-                                                        </AlertDialogDescription>
-                                                    </AlertDialogHeader>
-                                                    <AlertDialogFooter>
-                                                        <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                                        <AlertDialogAction onClick={() => onDelete(product.id)}>Delete</AlertDialogAction>
-                                                    </AlertDialogFooter>
-                                                </AlertDialogContent>
-                                            </AlertDialog>
                                         </div>
-                                    </TableCell>
-                                </TableRow>
-                            ))}
-                        </TableBody>
-                    </Table>
-                )}
-            </CardContent>
-        </Card>
+                                    </div>
+                                </TableCell>
+                                <TableCell>
+                                    <div className="flex items-center gap-2">
+                                        <Button
+                                            variant="ghost"
+                                            size="icon"
+                                            onClick={() => onEdit(product)}
+                                        >
+                                            <Edit className="h-4 w-4" />
+                                        </Button>
+                                        <AlertDialog>
+                                            <AlertDialogTrigger asChild>
+                                                <Button variant="ghost" size="icon">
+                                                    <Trash2 className="h-4 w-4" />
+                                                </Button>
+                                            </AlertDialogTrigger>
+                                            <AlertDialogContent>
+                                                <AlertDialogHeader>
+                                                    <AlertDialogTitle>حذف المنتج</AlertDialogTitle>
+                                                    <AlertDialogDescription>
+                                                        هل أنت متأكد من أنك تريد حذف هذا المنتج؟ لا يمكن التراجع عن هذا الإجراء.
+                                                    </AlertDialogDescription>
+                                                </AlertDialogHeader>
+                                                <AlertDialogFooter>
+                                                    <AlertDialogCancel>إلغاء</AlertDialogCancel>
+                                                    <AlertDialogAction onClick={() => onDelete(product.id)}>
+                                                        حذف
+                                                    </AlertDialogAction>
+                                                </AlertDialogFooter>
+                                            </AlertDialogContent>
+                                        </AlertDialog>
+                                    </div>
+                                </TableCell>
+                            </TableRow>
+                        ))
+                    )}
+                </TableBody>
+            </Table>
+
+            {/* Restock Dialog */}
+            <Dialog open={isRestockDialogOpen} onOpenChange={setIsRestockDialogOpen}>
+                <DialogContent className="sm:max-w-[425px]">
+                    <DialogHeader>
+                        <DialogTitle>إعادة تخزين المنتج</DialogTitle>
+                    </DialogHeader>
+                    <div className="grid gap-4 py-4">
+                        <div className="grid gap-2">
+                            <Label htmlFor="restock-amount">كمية إعادة التخزين</Label>
+                            <Input
+                                id="restock-amount"
+                                type="number"
+                                min="1"
+                                value={restockingProductId ? (restockAmount[restockingProductId] || "") : ""}
+                                onChange={(e) => {
+                                    if (restockingProductId) {
+                                        setRestockAmount({
+                                            ...restockAmount,
+                                            [restockingProductId]: parseInt(e.target.value) || 0
+                                        })
+                                    }
+                                }}
+                            />
+                        </div>
+                    </div>
+                    <div className="flex justify-end gap-2">
+                        <Button variant="outline" onClick={() => setIsRestockDialogOpen(false)}>
+                            إلغاء
+                        </Button>
+                        <Button onClick={handleRestock}>
+                            إعادة تخزين
+                        </Button>
+                    </div>
+                </DialogContent>
+            </Dialog>
+        </>
     )
 } 

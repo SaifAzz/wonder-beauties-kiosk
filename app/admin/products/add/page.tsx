@@ -53,8 +53,8 @@ export default function AddProductPage() {
 
         if (!formData.name || !formData.price || !formData.quantity || !formData.country) {
             toast({
-                title: "Error",
-                description: "Please fill in all required fields",
+                title: "خطأ",
+                description: "يرجى ملء جميع الحقول المطلوبة",
                 variant: "destructive",
             })
             return
@@ -63,11 +63,15 @@ export default function AddProductPage() {
         try {
             setIsLoading(true)
 
+            // Apply 10% markup to the price
+            const originalPrice = parseFloat(formData.price)
+            const markedUpPrice = (originalPrice * 1.1).toFixed(2)
+
             // Create a FormData object for the file upload
             const submitData = new FormData()
             submitData.append("name", formData.name)
             submitData.append("description", formData.description)
-            submitData.append("price", formData.price)
+            submitData.append("price", markedUpPrice)
             submitData.append("quantity", formData.quantity)
             submitData.append("country", formData.country)
 
@@ -86,16 +90,16 @@ export default function AddProductPage() {
 
             if (!data.success) {
                 toast({
-                    title: "Error",
-                    description: data.message || "Failed to add product",
+                    title: "خطأ",
+                    description: data.message || "فشل في إضافة المنتج",
                     variant: "destructive",
                 })
                 return
             }
 
             toast({
-                title: "Success",
-                description: "Product added successfully",
+                title: "نجاح",
+                description: "تمت إضافة المنتج بنجاح",
             })
 
             // Redirect to products list
@@ -103,8 +107,8 @@ export default function AddProductPage() {
         } catch (error) {
             console.error("Error adding product:", error)
             toast({
-                title: "Error",
-                description: "An error occurred. Please try again.",
+                title: "خطأ",
+                description: "حدث خطأ. يرجى المحاولة مرة أخرى.",
                 variant: "destructive",
             })
         } finally {
@@ -112,17 +116,24 @@ export default function AddProductPage() {
         }
     }
 
+    // Calculate the displayed price with 10% markup
+    const calculateMarkedUpPrice = () => {
+        if (!formData.price) return ""
+        const originalPrice = parseFloat(formData.price)
+        return isNaN(originalPrice) ? "" : (originalPrice * 1.1).toFixed(2)
+    }
+
     return (
         <div className="container max-w-4xl py-10">
             <Card>
                 <CardHeader>
-                    <CardTitle className="text-2xl">Add New Product</CardTitle>
+                    <CardTitle className="text-2xl">إضافة منتج جديد</CardTitle>
                 </CardHeader>
                 <CardContent>
                     <form onSubmit={handleSubmit} className="space-y-6">
                         <div className="grid gap-4 sm:grid-cols-2">
                             <div className="space-y-2">
-                                <Label htmlFor="name">Product Name *</Label>
+                                <Label htmlFor="name">اسم المنتج *</Label>
                                 <Input
                                     id="name"
                                     name="name"
@@ -133,24 +144,24 @@ export default function AddProductPage() {
                             </div>
 
                             <div className="space-y-2">
-                                <Label htmlFor="country">Country *</Label>
+                                <Label htmlFor="country">البلد *</Label>
                                 <Select
                                     value={formData.country}
                                     onValueChange={(value) => handleSelectChange("country", value)}
                                 >
                                     <SelectTrigger>
-                                        <SelectValue placeholder="Select country" />
+                                        <SelectValue placeholder="اختر البلد" />
                                     </SelectTrigger>
                                     <SelectContent>
-                                        <SelectItem value="Iraq">Iraq</SelectItem>
-                                        <SelectItem value="Syria">Syria</SelectItem>
+                                        <SelectItem value="Iraq">العراق</SelectItem>
+                                        <SelectItem value="Syria">سوريا</SelectItem>
                                     </SelectContent>
                                 </Select>
                             </div>
                         </div>
 
                         <div className="space-y-2">
-                            <Label htmlFor="description">Description</Label>
+                            <Label htmlFor="description">الوصف</Label>
                             <Textarea
                                 id="description"
                                 name="description"
@@ -162,7 +173,7 @@ export default function AddProductPage() {
 
                         <div className="grid gap-4 sm:grid-cols-2">
                             <div className="space-y-2">
-                                <Label htmlFor="price">Price (USD) *</Label>
+                                <Label htmlFor="price">السعر الأساسي (دولار) *</Label>
                                 <Input
                                     id="price"
                                     name="price"
@@ -176,23 +187,31 @@ export default function AddProductPage() {
                             </div>
 
                             <div className="space-y-2">
-                                <Label htmlFor="quantity">Quantity *</Label>
+                                <Label>السعر النهائي (مع زيادة 10٪)</Label>
                                 <Input
-                                    id="quantity"
-                                    name="quantity"
-                                    type="number"
-                                    min="0"
-                                    step="1"
-                                    value={formData.quantity}
-                                    onChange={handleChange}
-                                    required
+                                    value={calculateMarkedUpPrice()}
+                                    readOnly
+                                    disabled
                                 />
                             </div>
                         </div>
 
+                        <div className="space-y-2">
+                            <Label htmlFor="quantity">الكمية *</Label>
+                            <Input
+                                id="quantity"
+                                name="quantity"
+                                type="number"
+                                min="0"
+                                step="1"
+                                value={formData.quantity}
+                                onChange={handleChange}
+                                required
+                            />
+                        </div>
 
                         <div className="space-y-2">
-                            <Label htmlFor="image">Product Image</Label>
+                            <Label htmlFor="image">صورة المنتج</Label>
                             <div className="flex items-center gap-4">
                                 <div className="flex-1">
                                     <Label
@@ -201,7 +220,7 @@ export default function AddProductPage() {
                                     >
                                         <div className="flex flex-col items-center justify-center pt-5 pb-6">
                                             <Upload className="w-8 h-8 mb-2 text-muted-foreground" />
-                                            <p className="text-sm text-muted-foreground">Click to upload or drag and drop</p>
+                                            <p className="text-sm text-muted-foreground">انقر للتحميل أو اسحب وأفلت</p>
                                         </div>
                                         <Input
                                             id="image"
@@ -217,7 +236,7 @@ export default function AddProductPage() {
                                     <div className="relative h-32 w-32 overflow-hidden rounded-md border">
                                         <img
                                             src={imagePreview || "/placeholder.svg"}
-                                            alt="Preview"
+                                            alt="معاينة"
                                             className="h-full w-full object-cover"
                                         />
                                     </div>
@@ -232,10 +251,10 @@ export default function AddProductPage() {
                                 onClick={() => router.push("/admin/products")}
                                 disabled={isLoading}
                             >
-                                Cancel
+                                إلغاء
                             </Button>
                             <Button type="submit" disabled={isLoading}>
-                                {isLoading ? "Adding..." : "Add Product"}
+                                {isLoading ? "جاري الإضافة..." : "إضافة المنتج"}
                             </Button>
                         </div>
                     </form>

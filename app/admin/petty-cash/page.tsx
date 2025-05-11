@@ -165,7 +165,7 @@ export default function PettyCashPage() {
                         <div className="flex items-center">
                             <DollarSign className="h-5 w-5 mr-2 text-muted-foreground" />
                             <span className={`text-2xl font-bold ${total >= 0 ? "text-green-600" : "text-red-600"}`}>
-                                ${Math.abs(total).toFixed(2)}
+                                {Math.abs(total).toFixed(2)}
                             </span>
                             {total >= 0 ? (
                                 <span className="bg-green-100 text-green-800 text-xs rounded-full px-2 py-1 ml-2">

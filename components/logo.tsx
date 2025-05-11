@@ -6,7 +6,7 @@ export function Logo() {
           <img src="/wonder2.avif" alt="Wonder Beauties Logo" className="object-contain w-8 h-8" />
         </div>
       </div>
-      <span className="font-bold text-lg text-cherry hidden md:inline-block">Wonder Beauties</span>
+      <span className="font-bold text-lg text-cherry hidden md:inline-block">وندر بيوتي</span>
     </>
   )
 }

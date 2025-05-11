@@ -7,8 +7,8 @@ async function main() {
   // Hash the admin password
   const hashedPassword = await bcrypt.hash('adminPassword123', 10)
   
-  // Create admin user
-  const admin = await prisma.user.upsert({
+  // Create admin user for Iraq
+  const adminIraq = await prisma.user.upsert({
     where: { phone: '1234567890' },
     update: {
       password: hashedPassword
@@ -23,7 +23,23 @@ async function main() {
     },
   })
 
-  console.log({ admin })
+  // Create admin user for Syria
+  const adminSyria = await prisma.user.upsert({
+    where: { phone: '9876543210' },
+    update: {
+      password: hashedPassword
+    },
+    create: {
+      phone: '9876543210',
+      name: 'Syria Admin',
+      password: hashedPassword,
+      country: 'Syria',
+      role: 'ADMIN',
+      isVerified: true,
+    },
+  })
+
+  console.log({ adminIraq, adminSyria })
 }
 
 main()

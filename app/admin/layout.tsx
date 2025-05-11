@@ -36,8 +36,8 @@ export default function AdminLayout({
 
         if (!data.success || !data.user || data.user.role !== "ADMIN") {
           toast({
-            title: "Authentication Required",
-            description: "Please login as an admin to access this page",
+            title: "مطلوب المصادقة",
+            description: "يرجى تسجيل الدخول كمسؤول للوصول إلى هذه الصفحة",
             variant: "destructive",
           })
           router.push("/login")
@@ -59,8 +59,8 @@ export default function AdminLayout({
       })
 
       toast({
-        title: "Logged Out",
-        description: "You have been successfully logged out",
+        title: "تم تسجيل الخروج",
+        description: "لقد تم تسجيل خروجك بنجاح",
       })
 
       // Redirect to login page
@@ -68,8 +68,8 @@ export default function AdminLayout({
     } catch (error) {
       console.error("Logout error:", error)
       toast({
-        title: "Error",
-        description: "Failed to logout properly",
+        title: "خطأ",
+        description: "فشل تسجيل الخروج بشكل صحيح",
         variant: "destructive",
       })
       // Still redirect even if there's an error
@@ -78,10 +78,10 @@ export default function AdminLayout({
   }
 
   const navigation = [
-    { name: "Dashboard", href: "/admin/dashboard", icon: LayoutDashboard },
-    { name: "Products", href: "/admin/products", icon: Package },
-    { name: "Reports", href: "/admin/reports", icon: FileText },
-    { name: "Users", href: "/admin/users", icon: Users },
+    { name: "لوحة التحكم", href: "/admin/dashboard", icon: LayoutDashboard },
+    { name: "المنتجات", href: "/admin/products", icon: Package },
+    { name: "التقارير", href: "/admin/reports", icon: FileText },
+    { name: "المستخدمين", href: "/admin/users", icon: Users },
   ]
 
   if (!mounted) return null
@@ -124,7 +124,7 @@ export default function AdminLayout({
               onClick={handleLogout}
             >
               <LogOut className="h-5 w-5 mr-3 text-gray-400" />
-              Logout
+              تسجيل الخروج
             </Button>
           </div>
         )}
@@ -166,7 +166,7 @@ export default function AdminLayout({
                 onClick={handleLogout}
               >
                 <LogOut className="h-5 w-5 mr-3 text-gray-400" />
-                Logout
+                تسجيل الخروج
               </Button>
             </div>
           </div>
